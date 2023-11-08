@@ -2,6 +2,10 @@ import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
 import { Heading } from "@chakra-ui/react";
 import { Stack } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router";
+import { useToast } from "@chakra-ui/react";
 // import { StackDivider } from "@chakra-ui/react";
 import { StackDivider } from "@chakra-ui/react";
 import { Input } from '@chakra-ui/react'
@@ -9,6 +13,59 @@ import { Box } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
 
 export default function Registecard() {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [registerdetails, setRegisterdetails] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const handleonchange = (e) => {
+    setRegisterdetails({ ...registerdetails, [e.target.name]: e.target.value });
+    console.log(registerdetails);
+  };
+  const handleregister = async (e) => {
+    e.preventDefault();
+    console.log("register");
+    const requestOptions = {
+      // method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        //   token: localStorage["token"],
+      },
+    };
+    //   const registerdata={registerdetails};
+    // console.log("register");
+    const register = await axios.post(
+      "http://localhost:3000/api/v1/auth/register",
+      registerdetails,
+      requestOptions
+    );
+    //   const exactdata=await register.data;
+    //   if()
+    const data = await register.data;
+    console.log(data);
+    console.log(data);
+    if (data.error) {
+      toast({
+        title: "Account not created.",
+        description: `${data.error}`,
+        status: "error",
+        duration: 1000,
+        isClosable: true,
+      });
+      console.log("not able to register");
+      return;
+    }
+    toast({
+      title: "Account created.",
+      description: "We've registered your account for you.",
+      status: "success",
+      duration: 1000,
+      isClosable: true,
+    });
+    navigate("/login");
+  };
   return (
     <Card className="flex flex-col items-center" style={{fontFamily:"roboto"}}>
       <CardHeader>
@@ -16,20 +73,23 @@ export default function Registecard() {
       </CardHeader>
 
       <CardBody>
+        <form onSubmit={handleregister}>
+
         {/* <Stack divider={<StackDivider />} spacing="4"> */}
           <Box>
             <Text className="text-center font-bold">Enter your name</Text>
-            <Input placeholder='Enter your name' className="mb-2"/>
+            <Input name="name" placeholder='Enter your name' className="mb-2" onChange={handleonchange}/>
           </Box>
           <Box>
           <Text className="text-center font-bold">Enter your username</Text>
-            <Input placeholder='Enter your username' className="mb-2"/>
+            <Input name="email" placeholder='Enter your username' className="mb-2" onChange={handleonchange}/>
           </Box>
           <Box>
           <Text className="text-center font-bold">Enter your password</Text>
-            <Input placeholder='Enter your password' className="mb-2"/>
+            <Input name="password" placeholder='Enter your password' className="mb-2" onChange={handleonchange}/>
           </Box>
-          <Button className="flex justify-center w-full mt-4 " style={{backgroundColor:"#fac83e"}} >REGISTER</Button>
+          <Button type="submit" className="flex justify-center w-full mt-4 " style={{backgroundColor:"#fac83e"}} >REGISTER</Button>
+        </form>
         {/* </Stack> */}
       </CardBody>
     </Card>
