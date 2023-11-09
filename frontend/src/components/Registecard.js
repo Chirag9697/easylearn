@@ -12,7 +12,7 @@ import { Input } from '@chakra-ui/react'
 import { Box } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
 
-export default function Registecard() {
+export default function Registecard(props) {
   const navigate = useNavigate();
   const toast = useToast();
   const [registerdetails, setRegisterdetails] = useState({
@@ -38,7 +38,7 @@ export default function Registecard() {
     // console.log("register");
     const register = await axios.post(
       "http://localhost:3000/api/v1/auth/register",
-      registerdetails,
+      {...registerdetails,role:props.role},
       requestOptions
     );
     //   const exactdata=await register.data;

@@ -4,13 +4,12 @@
  */
 exports.up = function(knex) {
     return knex.schema
-    .createTable('likedsongs', function (table) {
+    .createTable('users', function (table) {
         table.increments('id');
-        // table.string('nameofmusic').notNullable()
-        // table.string('videoid').notNullable()
-        table.integer('musicid').references('music.id');
-        table.integer('userid').references('users.id');
-        // table.string('password',255).notNullable();
+        table.string('name').notNullable()
+        table.string('email', 255).notNullable().unique();
+        table.string('password',255).notNullable();
+        table.string('role').notNullable();
         // table.jsonb('roles');
         // table.string('last_name', 255).notNullable();
     })
@@ -21,5 +20,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-    return knex.schema.dropTable('likedsongs');
+    return knex.schema.dropTable('users');
 };

@@ -37,7 +37,9 @@ export default function Nav() {
             alt="activity-feed-2"
           />
         </div>
-        <div className={`hidden md:flex justify-between w-48 mr-4`}>
+        {
+          !localStorage.getItem("token") &&
+          <div className={`hidden md:flex justify-between w-48 mr-4`}>
           <Link to="login">
             <p className="flex items-center p-5 font-semibold hover:cursor-pointer hover:bg-amber-400 hover:transition-shadow transition ease-in duration-150">
               LOGIN
@@ -49,6 +51,7 @@ export default function Nav() {
             </p>
           </Link>
         </div>
+        }
       </div>
       <div
         className={`${
@@ -56,16 +59,23 @@ export default function Nav() {
         } md:hidden`}
         style={{ opacity: opennav === true ? 1 : 0 }}
       >
-        <Link to="/login">
+        {
+          !localStorage.getItem("token") &&
+          <Link to="/login">
           <p className="flex items-center bg-amber-300  justify-center p-5 w-full font-semibold hover:cursor-pointer hover:bg-amber-400 transition ease-in duration-150">
             LOGIN
           </p>
         </Link>
-        <Link to="/register">
+        }
+        {
+          !localStorage.getItem("token") && 
+          <Link to="/register">
+        
           <p className="flex items-center bg-amber-300  justify-center p-5 w-full font-semibold hover:cursor-pointer hover:bg-amber-400">
             REGISTER
           </p>
         </Link>
+        }
       </div>
     </>
   );

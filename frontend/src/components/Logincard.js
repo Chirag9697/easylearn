@@ -12,7 +12,7 @@ import { useNavigate } from "react-router";
 import { StackDivider } from "@chakra-ui/react";
 import { Input } from '@chakra-ui/react'
 import { Box } from "@chakra-ui/react";
-export default function Logincard() {
+export default function Logincard(props) {
   const toast = useToast();
   const navigate=useNavigate();
   const [logindetails, setLogindetails] = useState({email: "",password:""});

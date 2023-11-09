@@ -32,7 +32,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const register = async (data) => {
-    const { email, password, name } = data;
+    const { email, password, name, role } = data;
     console.log("hello");
     const finduser = await fromusers.get_one2(email);
     console.log("hello", finduser);
@@ -41,7 +41,7 @@ const register = async (data) => {
         throw new Error("email is already used");
         return;
     }
-    const data1 = { email: email, name: name, password: await bcrypt_1.default.hash(password, parseInt(process.env.Saltrounds)) };
+    const data1 = { email: email, name: name, password: await bcrypt_1.default.hash(password, parseInt(process.env.Saltrounds)), role: role };
     const userid = await fromusers.create(data1);
     return userid;
 };

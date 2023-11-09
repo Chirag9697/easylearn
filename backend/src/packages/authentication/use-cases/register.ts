@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const register=async(data)=>{
-    const {email,password,name}=data;
+    const {email,password,name,role}=data;
     console.log("hello");
     const finduser=await fromusers.get_one2(email);
     console.log("hello",finduser);
@@ -14,7 +14,7 @@ export const register=async(data)=>{
         throw new Error("email is already used");
         return;
     }
-    const data1={email:email,name:name,password:await bcrypt.hash(password,parseInt(process.env.Saltrounds))};
+    const data1={email:email,name:name,password:await bcrypt.hash(password,parseInt(process.env.Saltrounds)),role:role};
 
     const userid=await fromusers.create(data1);    
     return userid;

@@ -5,6 +5,7 @@ import { Model } from 'objection';
 import cors from 'cors';
 import * as fromuser from './packages/users';
 import * as fromauth from './packages/authentication';
+import * as fromclass from './packages/classes';
 import {development} from '../knexfile';
 
 export const app=express();
@@ -20,6 +21,7 @@ app.use(express.json());
 const initial="api/v1";
 
 app.use(`/${initial}/auth`,fromauth.router);
+app.use(`/${initial}/classes`,fromclass.router);
 
 
 app.listen(3000,()=>{

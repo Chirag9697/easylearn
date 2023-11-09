@@ -32,33 +32,29 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const fromusers = __importStar(require("../packages/users"));
 // import * as fromroles from '../packages/roles';
 dotenv_1.default.config();
-const checktoken = async (req, res, next) => {
-    const token = req.headers['token'];
-    console.log("token", token);
-    if (!token) {
-        return res.status(200).send({ error: "you need to login first" });
-    }
-    console.log(process.env.PRIVATE_KEY);
-    await jsonwebtoken_1.default.verify(token.toString(), process.env.PRIVATE_KEY, async function (err, decoded) {
-        console.log(decoded);
-        if (err) {
-            return res.status(200).send({ error: `${err.message}` });
+const checktoken = (rolesdata) => {
+    return async (req, res, next) => {
+        const token = req.headers['x-access-token'];
+        console.log("token", token);
+        if (!token) {
+            return res.status(200).send({ error: "you need to login first" });
         }
-        // return decoded;
-        // console.log("hello I am user",decoded);
-        req.user = decoded;
-        // console.log("using",req.user);
-        const user = await fromusers.get_one2(decoded.email);
-        console.log(user);
-        // const role=await fromroles.get_one(user['id']);
-        // console.log("roles",role)
-        console.log("logged in");
-        // console.log(rolesdata)
-        // if(!rolesdata.includes(role.rolename)){
-        // return res.status(200).send("not accessible");
-        // }
-        next();
-    });
+        console.log(process.env.PRIVATE_KEY);
+        await jsonwebtoken_1.default.verify(token.toString(), process.env.PRIVATE_KEY, async function (err, decoded) {
+            console.log(decoded);
+            if (err) {
+                return res.status(200).send({ error: `${err.message}` });
+            }
+            req.user = decoded;
+            console.log("using", req.user);
+            const user = await fromusers.get_one2(decoded.email);
+            console.log(user);
+            if (!rolesdata.includes(user.role)) {
+                return res.status(200).send({ error: "not accessible" });
+            }
+            next();
+        });
+    };
 };
 exports.checktoken = checktoken;
 // 

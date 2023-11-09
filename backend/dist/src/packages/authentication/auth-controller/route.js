@@ -36,8 +36,9 @@ const app = (0, express_1.default)();
 exports.router = express_1.default.Router();
 exports.router.post('/register', async (req, res) => {
     console.log("registerhere");
-    const { name, email, password } = req.body;
-    const data1 = { name, email, password };
+    console.log(req.body);
+    const { name, email, password, role } = req.body;
+    const data1 = { name, email, password, role };
     console.log(data1);
     try {
         const newuser = await fromauth.register(data1);
