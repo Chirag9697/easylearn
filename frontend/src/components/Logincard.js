@@ -33,7 +33,7 @@ export default function Logincard(props) {
     //   const registerdata={registerdetails};
     const login = await axios.post(
       "http://localhost:3000/api/v1/auth/login",
-    logindetails,
+  {...logindetails,role:props.role},
       requestOptions
     );
     const data=await login.data;
@@ -60,6 +60,7 @@ export default function Logincard(props) {
       isClosable: true,
     })
     // console.log(socket.on('connection'));
+    localStorage.setItem('role',props.role);
     // socket.on("connect_error", (err) => {
       // console.log(`connect_error due to ${err.message}`);
     // });

@@ -10,10 +10,10 @@ import { Home } from './pages/Home';
 function App() {
   return (
     <div>
-    <Nav/>
     <Routes>
-       
+          <Route path="/" element={<Login/>} />
           <Route path="/login" element={<Login/>} />
+       
           <Route path="/register" element={<Register/>} />
           <Route path="/home" element={<Home/>} />
          

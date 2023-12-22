@@ -21,12 +21,11 @@ router.post('/',checktoken(["teacher"]),async(req,res)=>{
     try{
         let i;
         for(i=0;i<members.length;i++){
-            const getstudentdata=await fromusers.get_one(members[i]);
-            console.log(getstudentdata);
             const getteacherid=await fromusers.get_one2(req.user.email);
-            const data={classname:classname,studentid:getstudentdata["id"],teacherid:getteacherid["id"]};
+            const data={classname:classname,studentid:members[i],teacherid:getteacherid["id"]};
             const addclass=await fromclass.create(data);
         }
+        res.send("class added");
     }catch(error){
         console.log(error)
         // return res.status(200).send({error:`${error}`});

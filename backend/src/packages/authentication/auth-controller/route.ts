@@ -25,7 +25,7 @@ router.post('/register',async(req,res)=>{
         return res.status(200).send(newuser);
     }catch(error){
         console.log(error)
-        // return res.status(200).send({error:`${error}`});
+        res.status(200).send({error:`${error}`});
     }
 })
 

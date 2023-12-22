@@ -14,13 +14,13 @@ export default function SwitchTabs() {
       </TabList>
       <TabPanels>
         <TabPanel>
-          {location.pathname=='/login'?
-          <Logincard role={"teacher"}/>:<Registecard role={"teacher"}/>
+          {location.pathname=='/register'?
+          <Registecard role={"teacher"}/>:<Logincard role={"teacher"}/>
           }
         </TabPanel>
         <TabPanel>
         {location.pathname=='/login'?
-          <Logincard role={"student"}/>:<Registecard role={"student"}/>
+          <Registecard role={"student"}/>:<Logincard role={"student"}/>
           }
         </TabPanel>
       </TabPanels>

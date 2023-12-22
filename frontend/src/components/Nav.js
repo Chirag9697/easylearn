@@ -1,8 +1,11 @@
 import React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-export default function Nav() {
+import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+export default function Nav(props) {
   const [opennav, setOpennav] = useState(false);
+  const navigate=useNavigate();
   const handleopennav = () => {
     if (opennav == true) {
       setOpennav(false);
@@ -10,6 +13,11 @@ export default function Nav() {
       setOpennav(true);
     }
   };
+  const logout=()=>{
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate('/login');
+  }
   return (
     <>
       <div
@@ -38,9 +46,9 @@ export default function Nav() {
           />
         </div>
         {
-          !localStorage.getItem("token") &&
+          props.loginstate==false &&
           <div className={`hidden md:flex justify-between w-48 mr-4`}>
-          <Link to="login">
+          <Link to="/login">
             <p className="flex items-center p-5 font-semibold hover:cursor-pointer hover:bg-amber-400 hover:transition-shadow transition ease-in duration-150">
               LOGIN
             </p>
@@ -50,6 +58,14 @@ export default function Nav() {
               REGISTER
             </p>
           </Link>
+        </div>
+        }
+        {
+          props.loginstate==true &&
+          <div className={`hidden md:flex justify-between w-48 mr-4`}>
+            <button className="flex items-center p-5 font-semibold hover:cursor-pointer hover:bg-amber-400 hover:transition-shadow transition ease-in duration-150" onClick={logout}>
+              LOGOUT
+            </button>
         </div>
         }
       </div>

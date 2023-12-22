@@ -47,7 +47,7 @@ exports.router.post('/register', async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        // return res.status(200).send({error:`${error}`});
+        res.status(200).send({ error: `${error}` });
     }
 });
 exports.router.delete('/deleteuser/:id', async (req, res) => {
