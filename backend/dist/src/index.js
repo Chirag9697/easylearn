@@ -31,6 +31,7 @@ exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const knex_1 = __importDefault(require("knex"));
 const objection_1 = require("objection");
+const fromuser = __importStar(require("./packages/users"));
 const fromauth = __importStar(require("./packages/authentication"));
 const fromclass = __importStar(require("./packages/classes"));
 const knexfile_1 = require("../knexfile");
@@ -44,6 +45,7 @@ exports.app.use(express_1.default.json());
 const initial = "api/v1";
 exports.app.use(`/${initial}/auth`, fromauth.router);
 exports.app.use(`/${initial}/classes`, fromclass.router);
+exports.app.use(`/${initial}/users`, fromuser.router);
 exports.app.listen(3000, () => {
     console.log("listening on port 3000");
 });

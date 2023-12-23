@@ -34,7 +34,7 @@ const fromusers = __importStar(require("../packages/users"));
 dotenv_1.default.config();
 const checktoken = (rolesdata) => {
     return async (req, res, next) => {
-        const token = req.headers['x-access-token'];
+        const token = req.headers['token'];
         console.log("token", token);
         if (!token) {
             return res.status(200).send({ error: "you need to login first" });

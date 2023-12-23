@@ -6,8 +6,8 @@ import { FiMenu } from "react-icons/fi";
 export const Home = () => {
   return (
     <Flex w="100%">
-      <Sidebar />
-      
+    <Sidebar />
+    
     </Flex>
   );
 };

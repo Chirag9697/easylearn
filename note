@@ -1,0 +1,5 @@
+redudancy
+parent class
+    classid classname
+child class
+    studentid teacherid classid

@@ -21,6 +21,7 @@ import { Button } from '@chakra-ui/react'
 import { IoPawOutline } from 'react-icons/io5'
 import NavItem from '../components/NavItem'
 import { useNavigate } from 'react-router'
+import { Link } from 'react-router-dom'
 export default function Sidebar() {
     const [navSize, changeNavSize] = useState("large")
     const navigate=useNavigate();
@@ -40,13 +41,16 @@ export default function Sidebar() {
             w={navSize == "small" ? "75px" : "200px"}
             flexDir="column"
             // justifyContent="space-between"
-        >
+            >
             <Flex
+                // sx={{backgroundColor:"yellow"}}
+                // className='bg-yellow-600'
                 p="1%"
                 flexDir="column"
                 w="100%"
                 alignItems={navSize == "small" ? "center" : "flex-start"}
                 as="nav"
+                
             >
                 <IconButton
                     background="none"
@@ -60,7 +64,9 @@ export default function Sidebar() {
                             changeNavSize("small")
                     }}
                 />
-                <NavItem navSize={navSize} icon={FiHome} title="Dashboard" description="This is the description for the dashboard." />
+                <Link to="/myclasses">
+                    <NavItem navSize={navSize} icon={FiHome} title="MyClasses" description="This is the description for the dashboard." />
+                </Link>
                 <NavItem navSize={navSize} icon={FiCalendar} title="Calendar"  />
                 <NavItem navSize={navSize} icon={FiUser} title="Clients" />
                 <NavItem navSize={navSize} icon={IoPawOutline} title="Animals" />

@@ -6,5 +6,6 @@ export const get_one=async(id:any)=>{
 }
 export const get_one2=async(email:any)=>{
     const person=await users.query().first().where('email','=',email);
+    console.log(person);
     return person;
 }

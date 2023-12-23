@@ -1,6 +1,7 @@
 import { classes } from "../domain/class";
 export const getall=async()=>{
-    const allpersons=await classes.query();
-    console.log(allpersons);
+    const allclasses=await classes.query();
+    console.log(allclasses);
+    return  allclasses;
     // return allpersons;
 }

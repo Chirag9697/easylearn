@@ -9,6 +9,7 @@ const get_one = async (id) => {
 exports.get_one = get_one;
 const get_one2 = async (email) => {
     const person = await users_1.users.query().first().where('email', '=', email);
+    console.log(person);
     return person;
 };
 exports.get_one2 = get_one2;

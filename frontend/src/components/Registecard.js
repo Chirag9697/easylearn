@@ -41,11 +41,7 @@ export default function Registecard(props) {
       {...registerdetails,role:props.role},
       requestOptions
     );
-    //   const exactdata=await register.data;
-    //   if()
     const data = await register.data;
-    console.log(data);
-    console.log(data);
     if (data.error) {
       toast({
         title: "Account not created.",

@@ -7,6 +7,7 @@ import SwitchTabs from './components/SwitchTabs';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { Home } from './pages/Home';
+import Myclasses from './pages/Myclasses';
 function App() {
   return (
     <div>
@@ -16,6 +17,7 @@ function App() {
        
           <Route path="/register" element={<Register/>} />
           <Route path="/home" element={<Home/>} />
+          <Route path="/myclasses" element={<Myclasses/>} />
          
     </Routes>
     </div>

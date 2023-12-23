@@ -5,7 +5,7 @@ import * as fromusers from '../packages/users';
 dotenv.config();
 export const checktoken=(rolesdata:any)=>{
     return async(req,res,next)=>{
-        const token=req.headers['x-access-token'];
+        const token=req.headers['token'];
         console.log("token",token);
         if(!token){
             return res.status(200).send({error:"you need to login first"});
