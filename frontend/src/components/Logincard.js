@@ -51,6 +51,7 @@ export default function Logincard(props) {
     const token=await login.data;
     // console.log(token);
     localStorage.setItem('token',token.token);
+    localStorage.setItem("name",logindetails.email);
     console.log(localStorage.getItem('token'));
     toast({
       title: 'login',

@@ -43,19 +43,20 @@ exports.router.post('/', (0, check_token_1.checktoken)(["teacher"]), async (req,
     console.log(req.body);
     const { classname, members } = req.body;
     const data1 = { classname: classname };
-    const addclass = await fromparentclass.create(data1);
-    console.log("edasd", addclass);
     try {
-        // for(let i=0;i<members.length;i++){
-        // const getteacherid=await fromusers.get_one2(req.user.email);
-        // const data2={teacherid:getteacherid["id"],studentid:members[i],classid:addclass['parentclass']['id']};
-        // const addclass2=await fromclass.create(data2);
-        // }
+        const addclass = await fromparentclass.create(data1);
+        const { classname, id } = addclass;
+        console.log(id);
+        for (let i = 0; i < members.length; i++) {
+            const getteacherid = await fromusers.get_one2(req.user.email);
+            const data2 = { teacherid: getteacherid["id"], studentid: members[i], classid: id };
+            const addclass2 = await fromclass.create(data2);
+            console.log(addclass2);
+        }
         res.send("class added");
     }
     catch (error) {
         console.log(error);
-        // return res.status(200).send({error:`${error}`});
     }
 });
 exports.router.get('/', (0, check_token_1.checktoken)(["teacher"]), async (req, res) => {
@@ -64,15 +65,17 @@ exports.router.get('/', (0, check_token_1.checktoken)(["teacher"]), async (req, 
         const getallclasses = await fromclass.getall();
         let getmyclasses = [];
         for (let i = 0; i < getallclasses.length; i++) {
-            // console.log(getallclasses[i].teacherid)
-            // console.log(getteacherid["id"]);
             if (getallclasses[i].teacherid.localeCompare(getteacherid["id"]) === 0) {
                 getmyclasses.push(getallclasses[i]);
             }
             ;
         }
-        console.log(getmyclasses);
-        res.send({ myclasses: getmyclasses });
+        let getclassdetails = [];
+        for (let j = 0; j < getmyclasses.length; j++) {
+            const getclass = await fromparentclass.get_one(getmyclasses[j].classid);
+            getclassdetails.push(getclass);
+        }
+        res.send({ myclasses: getclassdetails });
     }
     catch (error) {
         res.send({ error: error });
