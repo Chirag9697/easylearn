@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import { Home } from './pages/Home';
 import Myclasses from './pages/Myclasses';
+import Mainclass from './pages/Mainclass';
 function App() {
   return (
     <div>
@@ -18,7 +19,7 @@ function App() {
           <Route path="/register" element={<Register/>} />
           <Route path="/home" element={<Home/>} />
           <Route path="/myclasses" element={<Myclasses/>} />
-         
+          <Route path="/myclasses/:id" element={<Mainclass/>} />
     </Routes>
     </div>
   );

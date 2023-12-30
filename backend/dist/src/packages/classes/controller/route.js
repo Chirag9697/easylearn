@@ -59,13 +59,18 @@ exports.router.post('/', (0, check_token_1.checktoken)(["teacher"]), async (req,
         console.log(error);
     }
 });
-exports.router.get('/', (0, check_token_1.checktoken)(["teacher"]), async (req, res) => {
+exports.router.get('/', (0, check_token_1.checktoken)(["teacher", "student"]), async (req, res) => {
     try {
         const getteacherid = await fromusers.get_one2(req.user.email);
+        console.log(req.user);
         const getallclasses = await fromclass.getall();
         let getmyclasses = [];
         for (let i = 0; i < getallclasses.length; i++) {
-            if (getallclasses[i].teacherid.localeCompare(getteacherid["id"]) === 0) {
+            if (req.user.role == "teacher" && getallclasses[i].teacherid.localeCompare(getteacherid["id"]) === 0) {
+                getmyclasses.push(getallclasses[i]);
+            }
+            ;
+            if (req.user.role == "student" && getallclasses[i].studentid.localeCompare(getteacherid["id"]) === 0) {
                 getmyclasses.push(getallclasses[i]);
             }
             ;

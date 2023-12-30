@@ -15,14 +15,17 @@ import {
   ModalCloseButton,
 } from "@chakra-ui/react";
 import { Checkbox } from "@chakra-ui/react";
+import { useRef } from "react";
 import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
 import { Heading } from "@chakra-ui/react";
+import { Link } from "react-router-dom";
 export default function Myclasses() {
   const [mydetails, setmydetails] = useState({});
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [allstudents, setAllstudents] = useState([]);
   const [allclasses, setAllclasses] = useState([]);
   const [newmembers, setNewmembers] = useState([]);
+  const element=useRef();
   const getmydetails = async () => {
     const requestOptions = {
       // method: "GET",
@@ -32,7 +35,7 @@ export default function Myclasses() {
       },
     };
     const myaccdet = await axios.get(
-      "http://localhost:3000/api/v1/users/getmydetails",
+      "http://localhost:3001/api/v1/users/getmydetails",
       requestOptions
     );
     setmydetails(myaccdet.data.details);
@@ -46,15 +49,18 @@ export default function Myclasses() {
       },
     };
     const allclass = await axios.get(
-      "http://localhost:3000/api/v1/classes/",
+      "http://localhost:3001/api/v1/classes/",
       requestOptions
     );
     console.log("allclass", allclass.data.myclasses);
     // setAllclasses(allclass.data.myclasses);
-    const newclass = allclass.data.myclasses.map((item) => {
-      return { ...item };
-    });
-    setAllclasses(newclass);
+    if(allclass.data.myclasses!=undefined){
+
+      const newclass = allclass.data.myclasses.map((item) => {
+        return { ...item };
+      });
+      setAllclasses(newclass);
+    }
     // console.log("adad",allclasses);
   };
   const getallstudents = async () => {
@@ -66,9 +72,10 @@ export default function Myclasses() {
       },
     };
     const myaccdet = await axios.get(
-      "http://localhost:3000/api/v1/users/",
+      "http://localhost:3001/api/v1/users/",
       requestOptions
     );
+
     setAllstudents(myaccdet.data.allstudents);
   };
   const handleonchange = (event) => {
@@ -91,11 +98,14 @@ export default function Myclasses() {
     };
     const item = { classname: "temporary", members: newmembers };
     const myaccdet = await axios.post(
-      "http://localhost:3000/api/v1/classes",
+      "http://localhost:3001/api/v1/classes",
       item,
       requestOptions
     );
     console.log(myaccdet);
+    // element.click();
+    onClose();
+    getallclasses();
   };
   const handlemouseenter=(event)=>{
     event.target.style.backgroundColor="black";
@@ -104,9 +114,15 @@ export default function Myclasses() {
     event.target.style.backgroundColor="white";
   }
   useEffect(() => {
-    getmydetails();
-    getallstudents();
-    getallclasses();
+    if(localStorage.getItem("role")=="teacher"){
+       getmydetails();
+       getallstudents();
+       getallclasses();
+      }
+      else{
+        getallclasses();
+      // getallmyclasses();
+    }
   }, []);
 
   return (
@@ -129,31 +145,37 @@ export default function Myclasses() {
             overflow: "scroll",
           }}
         >
-          {allclasses.map((classItem, index) => (
+          {allclasses && allclasses.map((classItem, index) => (
+            <Link to={`/myclasses/${classItem.id}`}>
             <Card key={index} sx={{cursor:"pointer"}} _hover={{bg:"grey"}}>
                <CardHeader>
                 <Heading size="md">{classItem.classname}</Heading>
               </CardHeader>
               {/* Add other card components as needed */}
             </Card>
+            </Link>
           ))}
         </div>
-        <div style={{display:"flex",justifyContent:"center",alignItems:"center",height:"100vh",width:"20vw"}}>
+        {
+          localStorage.getItem("role")=="teacher" && 
+          <div style={{display:"flex",justifyContent:"center",alignItems:"center",height:"100vh",width:"20vw"}}>
           <Button onClick={onOpen}>Add a classroom</Button>
         </div>
+        }
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
           <ModalContent>
+
             <ModalHeader>ADD STUDENTS</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              {allstudents.map((student) => {
+              {allstudents && allstudents.map((student) => {
                 return (
                   <Card
                     id={student.id}
                     className="mt-4 cursor-pointer"
                     sx={{ backgroundColor: "yellow" }}
-                  >
+                    >
                     <CardBody className="flex justify-between">
                       <Text>{student.name}</Text>
                       <Checkbox
@@ -167,7 +189,7 @@ export default function Myclasses() {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={onClose}>
+              <Button colorScheme="blue" mr={3} onClick={onClose} ref={element}>
                 Close
               </Button>
               <Button variant="ghost" onClick={addclassroom}>

@@ -20,6 +20,8 @@ export const checktoken=(rolesdata:any)=>{
             req.user=decoded;
             console.log("using",req.user);
             const user=await fromusers.get_one2(decoded.email);
+            const{role}=user;
+            req.user.role=role;
             console.log(user);
 
             if(!rolesdata.includes(user.role)){

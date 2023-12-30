@@ -36,15 +36,21 @@ router.post('/',checktoken(["teacher"]),async(req,res)=>{
         console.log(error)
     }
 })
-router.get('/',checktoken(["teacher"]),async(req,res)=>{
+router.get('/',checktoken(["teacher","student"]),async(req,res)=>{
     try{
             const getteacherid=await fromusers.get_one2(req.user.email);
+            console.log(req.user);
             const getallclasses=await fromclass.getall();
             let getmyclasses=[];
             for(let i=0;i<getallclasses.length;i++){
-                if(getallclasses[i].teacherid.localeCompare(getteacherid["id"])===0){
+
+                if(req.user.role=="teacher" && getallclasses[i].teacherid.localeCompare(getteacherid["id"])===0){
                     getmyclasses.push(getallclasses[i]);
                 };
+                if(req.user.role=="student" && getallclasses[i].studentid.localeCompare(getteacherid["id"])===0){
+                    getmyclasses.push(getallclasses[i]);
+                };
+
             }
             let getclassdetails=[];
             for(let j=0;j<getmyclasses.length;j++){

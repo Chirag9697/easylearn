@@ -37,7 +37,7 @@ export default function Registecard(props) {
     //   const registerdata={registerdetails};
     // console.log("register");
     const register = await axios.post(
-      "http://localhost:3000/api/v1/auth/register",
+      "http://localhost:3001/api/v1/auth/register",
       {...registerdetails,role:props.role},
       requestOptions
     );

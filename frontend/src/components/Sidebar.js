@@ -108,7 +108,13 @@ export default function Sidebar() {
             <Heading as="h3" size="sm">
               {localStorage.getItem("name")}
             </Heading>
+            {localStorage.getItem("role")=="teacher" &&
             <Text color="gray">Faculty</Text>
+            }
+            {localStorage.getItem("role")=="student" &&
+            <Text color="gray">student</Text>
+            }
+
           </Flex>
         </Flex>
       </Flex>

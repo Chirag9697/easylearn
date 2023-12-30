@@ -19,7 +19,7 @@ export default function SwitchTabs() {
         </TabPanel>
         <TabPanel>
         {location.pathname=='/login'?
-          <Registecard role={"student"}/>:<Logincard role={"student"}/>
+          <Logincard role={"student"}/>:<Registecard role={"student"}/>
           }
         </TabPanel>
       </TabPanels>

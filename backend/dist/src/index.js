@@ -31,23 +31,49 @@ exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const knex_1 = __importDefault(require("knex"));
 const objection_1 = require("objection");
+const cors_1 = __importDefault(require("cors"));
 const fromuser = __importStar(require("./packages/users"));
 const fromauth = __importStar(require("./packages/authentication"));
 const fromclass = __importStar(require("./packages/classes"));
+const http_1 = __importDefault(require("http"));
+const socket_io_1 = require("socket.io");
 const knexfile_1 = require("../knexfile");
 exports.app = (0, express_1.default)();
-// const development=require("../knexfile");
 const connection = knexfile_1.development;
-var cors = require('cors');
+const server = http_1.default.createServer(exports.app);
+const io = new socket_io_1.Server(server, {
+    cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"],
+    },
+});
+// const io = new Server(/server);
 objection_1.Model.knex((0, knex_1.default)(connection));
-exports.app.use(cors());
+exports.app.use((0, cors_1.default)());
 exports.app.use(express_1.default.json());
 const initial = "api/v1";
 exports.app.use(`/${initial}/auth`, fromauth.router);
 exports.app.use(`/${initial}/classes`, fromclass.router);
 exports.app.use(`/${initial}/users`, fromuser.router);
-exports.app.listen(3000, () => {
-    console.log("listening on port 3000");
+io.on('connection', (socket) => {
+    console.log('A user connected');
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+    socket.on("typing", (args) => {
+        // console.log(args);
+        socket.broadcast.emit("someonetyping", args);
+    });
+    socket.on("nottyping", (args) => {
+        // console.log(args);
+        socket.broadcast.emit("noonetyping", args);
+    });
+    socket.on("sendmessage", (args) => {
+        socket.broadcast.emit("receivemessage", args);
+    });
 });
-// module.exports=app;
+//   httpsServer.listen(3000);
+server.listen(3001, () => {
+    console.log("listening to port 3000");
+});
 //# sourceMappingURL=index.js.map
