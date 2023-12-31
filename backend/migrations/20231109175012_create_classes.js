@@ -5,7 +5,8 @@
 exports.up = function(knex) {
     return knex.schema
     .createTable('classes', function (table) {
-        table.increments('classid');
+        table.increments('id');
+        table.string('classid').notNullable();
         table.string('studentid').notNullable();
         table.string('teacherid').notNullable();
     })

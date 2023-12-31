@@ -35,6 +35,7 @@ const cors_1 = __importDefault(require("cors"));
 const fromuser = __importStar(require("./packages/users"));
 const fromauth = __importStar(require("./packages/authentication"));
 const fromclass = __importStar(require("./packages/classes"));
+const fromannouncement = __importStar(require("./packages/announcements"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const knexfile_1 = require("../knexfile");
@@ -55,21 +56,24 @@ const initial = "api/v1";
 exports.app.use(`/${initial}/auth`, fromauth.router);
 exports.app.use(`/${initial}/classes`, fromclass.router);
 exports.app.use(`/${initial}/users`, fromuser.router);
+exports.app.use(`/${initial}/announcements`, fromannouncement.router);
 io.on('connection', (socket) => {
     console.log('A user connected');
+    socket.on("joinroom", (data) => {
+        socket.join(data);
+        console.log("person is connected to room");
+    });
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });
     socket.on("typing", (args) => {
-        // console.log(args);
-        socket.broadcast.emit("someonetyping", args);
+        socket.to(args.room).emit("someonetyping", args);
     });
     socket.on("nottyping", (args) => {
-        // console.log(args);
-        socket.broadcast.emit("noonetyping", args);
+        socket.to(args.room).emit("noonetyping", args);
     });
     socket.on("sendmessage", (args) => {
-        socket.broadcast.emit("receivemessage", args);
+        socket.to(args.room).emit("receivemessage", args);
     });
 });
 //   httpsServer.listen(3000);

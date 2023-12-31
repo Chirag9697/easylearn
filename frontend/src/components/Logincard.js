@@ -12,9 +12,12 @@ import { useNavigate } from "react-router";
 import { StackDivider } from "@chakra-ui/react";
 import { Input } from '@chakra-ui/react'
 import { Box } from "@chakra-ui/react";
+import {useDispatch,useSelector} from 'react-redux';
+import {rolesstore} from "../features/roles/rolesdata";
 export default function Logincard(props) {
   const toast = useToast();
   const navigate=useNavigate();
+  const dispatch=useDispatch();
   const [logindetails, setLogindetails] = useState({email: "",password:""});
   const handleonchange = (e) => {
     setLogindetails({ ...logindetails, [e.target.name]: e.target.value });
@@ -24,12 +27,11 @@ export default function Logincard(props) {
     console.log("login")
     e.preventDefault();
     const requestOptions = {
-      // method: "GET",
       headers: {
         "Content-Type": "application/json",
-          // token: localStorage["token"],
       },
     };
+   
     //   const registerdata={registerdetails};
     const login = await axios.post(
       "http://localhost:3001/api/v1/auth/login",
@@ -52,6 +54,26 @@ export default function Logincard(props) {
     // console.log(token);
     localStorage.setItem('token',token.token);
     localStorage.setItem("name",logindetails.email);
+    const requestOptions2 = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
+    };
+    const getid=await axios.get("http://localhost:3001/api/v1/users/getmydetails",requestOptions2);
+    if(getid.data.error){
+      toast({
+        title: 'error message',
+        description: `${getid.data.error}`,
+        status: 'error',
+        duration: 1000,
+        isClosable: true,
+      })
+      return;
+    }
+    console.log(getid);
+    const newobj={teacherid:getid.data.details.id,role:props.role};
     console.log(localStorage.getItem('token'));
     toast({
       title: 'login',
@@ -60,14 +82,10 @@ export default function Logincard(props) {
       duration: 1000,
       isClosable: true,
     })
-    // console.log(socket.on('connection'));
+    dispatch(rolesstore(newobj));
     localStorage.setItem('role',props.role);
-    // socket.on("connect_error", (err) => {
-      // console.log(`connect_error due to ${err.message}`);
-    // });
     navigate('/home');
     return;
-    // navigate("/login");
 
   };
 

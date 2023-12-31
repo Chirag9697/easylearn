@@ -6,6 +6,7 @@ import cors from 'cors';
 import * as fromuser from './packages/users';
 import * as fromauth from './packages/authentication';
 import * as fromclass from './packages/classes';
+import * as fromannouncement from './packages/announcements';
 import http from 'http';
 import { Server } from 'socket.io';
 
@@ -34,23 +35,24 @@ const initial="api/v1";
 app.use(`/${initial}/auth`,fromauth.router);
 app.use(`/${initial}/classes`,fromclass.router);
 app.use(`/${initial}/users`,fromuser.router)
+app.use(`/${initial}/announcements`,fromannouncement.router);
 io.on('connection', (socket) => {
     console.log('A user connected');
+    socket.on("joinroom",(data)=>{
+        socket.join(data);
+        console.log("person is connected to room");
+    })
     socket.on('disconnect', () => {
       console.log('User disconnected');
     });
     socket.on("typing",(args)=>{
-        // console.log(args);
-
-        socket.broadcast.emit("someonetyping",args);
+        socket.to(args.room).emit("someonetyping",args);
     })
     socket.on("nottyping",(args)=>{
-        // console.log(args);
-
-        socket.broadcast.emit("noonetyping",args);
+        socket.to(args.room).emit("noonetyping",args);
     })
     socket.on("sendmessage",(args)=>{
-      socket.broadcast.emit("receivemessage",args);
+      socket.to(args.room).emit("receivemessage",args);
     })
   });
 //   httpsServer.listen(3000);

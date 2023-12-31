@@ -3,5 +3,8 @@ export const getall=async()=>{
     const allclasses=await classes.query();
     console.log(allclasses);
     return  allclasses;
-    // return allpersons;
+}
+export const getallclassid=async(classid)=>{
+    const allstudents=await classes.query().where('classid','=',classid);
+    return allstudents;
 }

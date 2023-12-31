@@ -56,7 +56,7 @@ exports.router.post('/', (0, check_token_1.checktoken)(["teacher"]), async (req,
         res.send("class added");
     }
     catch (error) {
-        console.log(error);
+        res.send({ error: error });
     }
 });
 exports.router.get('/', (0, check_token_1.checktoken)(["teacher", "student"]), async (req, res) => {
@@ -81,6 +81,22 @@ exports.router.get('/', (0, check_token_1.checktoken)(["teacher", "student"]), a
             getclassdetails.push(getclass);
         }
         res.send({ myclasses: getclassdetails });
+    }
+    catch (error) {
+        res.send({ error: error });
+    }
+});
+exports.router.get('/members/:classid', (0, check_token_1.checktoken)(["teacher"]), async (req, res) => {
+    try {
+        const { classid } = req.params;
+        const alldetails = await fromclass.getallclassid(classid);
+        // console.log(allstudents);
+        let allstudents = [];
+        for (let i = 0; i < alldetails.length; i++) {
+            let student = await fromusers.get_one(alldetails[i].studentid);
+            allstudents.push(student);
+        }
+        res.send({ allstudents: allstudents });
     }
     catch (error) {
         res.send({ error: error });

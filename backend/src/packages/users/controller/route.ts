@@ -27,7 +27,7 @@ router.get('/',checktoken(["teacher"]),async(req,res)=>{
     res.status(400).send({error:error});
    }
 })
-router.get('/getmydetails',checktoken(["teacher"]),async(req,res)=>{
+router.get('/getmydetails',checktoken(["student","teacher"]),async(req,res)=>{
     try{
         const getmyacc=await fromusers.get_one2(req.user.email);
         res.send({details:getmyacc});

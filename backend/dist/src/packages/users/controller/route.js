@@ -52,7 +52,7 @@ exports.router.get('/', (0, check_token_1.checktoken)(["teacher"]), async (req, 
         res.status(400).send({ error: error });
     }
 });
-exports.router.get('/getmydetails', (0, check_token_1.checktoken)(["teacher"]), async (req, res) => {
+exports.router.get('/getmydetails', (0, check_token_1.checktoken)(["student", "teacher"]), async (req, res) => {
     try {
         const getmyacc = await fromusers.get_one2(req.user.email);
         res.send({ details: getmyacc });

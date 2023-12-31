@@ -33,7 +33,7 @@ router.post('/',checktoken(["teacher"]),async(req,res)=>{
         }
         res.send("class added");
     }catch(error){
-        console.log(error)
+        res.send({error:error});
     }
 })
 router.get('/',checktoken(["teacher","student"]),async(req,res)=>{
@@ -63,5 +63,21 @@ router.get('/',checktoken(["teacher","student"]),async(req,res)=>{
         }
     }
 )
+
+router.get('/members/:classid',checktoken(["teacher"]),async(req,res)=>{
+    try{
+        const{classid}=req.params;
+        const alldetails=await fromclass.getallclassid(classid);
+        // console.log(allstudents);
+        let allstudents=[];
+        for(let i=0;i<alldetails.length;i++){
+            let student=await fromusers.get_one(alldetails[i].studentid);
+            allstudents.push(student);
+        }
+        res.send({allstudents:allstudents});
+    }catch(error){
+        res.send({error:error});
+    }
+})
 
 
