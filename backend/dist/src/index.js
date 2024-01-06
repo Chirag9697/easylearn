@@ -58,7 +58,7 @@ exports.app.use(`/${initial}/classes`, fromclass.router);
 exports.app.use(`/${initial}/users`, fromuser.router);
 exports.app.use(`/${initial}/announcements`, fromannouncement.router);
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    // console.log('A user connected');
     socket.on("joinroom", (data) => {
         socket.join(data);
         console.log("person is connected to room");

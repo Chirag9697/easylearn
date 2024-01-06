@@ -7,6 +7,7 @@ import { checktoken } from '../../../utils/check-token';
 //local
 import * as fromusers from '../../users';
 import * as fromannouncements from '../../announcements';
+import * as frompparentclass from '../../parentclass';
 dotenv.config();
 
 const app=express();
@@ -14,9 +15,22 @@ export const router=express.Router()
 
 router.get('/:classid/:teacherid',checktoken(['teacher','student']),async(req,res)=>{
     try{    
-        const{classid,teacherid}=req.params;
-        const allannouncement=await fromannouncements.getallannouncementc(classid,teacherid);
-        res.send({announcements:allannouncement});
+        if(req.user.role==="teacher"){
+
+            const{classid,teacherid}=req.params;
+            // console.log("hello",req.user);
+
+            const allannouncement=await fromannouncements.getallannouncementc(classid,teacherid);
+            console.log(allannouncement);
+            res.send({announcements:allannouncement});
+        }
+        else{
+            const{classid}=req.params;
+            const getteacherid=await frompparentclass.get_one(classid);
+            const{teacherid}=getteacherid; 
+            const allannouncement=await fromannouncements.getallannouncementc(classid,teacherid);
+            res.send({announcements:allannouncement});
+        }
     }catch(error){
         res.send({error:error})
     }

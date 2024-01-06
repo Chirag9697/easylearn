@@ -31,18 +31,17 @@ exports.router = void 0;
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const check_token_1 = require("../../../utils/check-token");
-//local
 const fromusers = __importStar(require("../../users"));
 const fromclass = __importStar(require("../../classes"));
 const fromparentclass = __importStar(require("../../parentclass"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 exports.router = express_1.default.Router();
-exports.router.post('/', (0, check_token_1.checktoken)(["teacher"]), async (req, res) => {
+exports.router.post('/', (0, check_token_1.checktoken)(["teacher", "student"]), async (req, res) => {
     console.log("adding classroom");
     console.log(req.body);
-    const { classname, members } = req.body;
-    const data1 = { classname: classname };
+    const { classname, members, teacherid } = req.body;
+    const data1 = { classname: classname, teacherid: teacherid };
     try {
         const addclass = await fromparentclass.create(data1);
         const { classname, id } = addclass;
@@ -53,7 +52,7 @@ exports.router.post('/', (0, check_token_1.checktoken)(["teacher"]), async (req,
             const addclass2 = await fromclass.create(data2);
             console.log(addclass2);
         }
-        res.send("class added");
+        res.send({ allclasses: addclass });
     }
     catch (error) {
         res.send({ error: error });
@@ -62,11 +61,11 @@ exports.router.post('/', (0, check_token_1.checktoken)(["teacher"]), async (req,
 exports.router.get('/', (0, check_token_1.checktoken)(["teacher", "student"]), async (req, res) => {
     try {
         const getteacherid = await fromusers.get_one2(req.user.email);
-        console.log(req.user);
         const getallclasses = await fromclass.getall();
+        const getallclassesteacher = await fromparentclass.getall();
         let getmyclasses = [];
-        for (let i = 0; i < getallclasses.length; i++) {
-            if (req.user.role == "teacher" && getallclasses[i].teacherid.localeCompare(getteacherid["id"]) === 0) {
+        for (let i = 0; i < getallclassesteacher.length; i++) {
+            if (req.user.role == "teacher" && getallclassesteacher[i]['teacherid'].localeCompare(getteacherid["id"]) === 0) {
                 getmyclasses.push(getallclasses[i]);
             }
             ;
@@ -80,17 +79,17 @@ exports.router.get('/', (0, check_token_1.checktoken)(["teacher", "student"]), a
             const getclass = await fromparentclass.get_one(getmyclasses[j].classid);
             getclassdetails.push(getclass);
         }
+        console.log(getclassdetails);
         res.send({ myclasses: getclassdetails });
     }
     catch (error) {
         res.send({ error: error });
     }
 });
-exports.router.get('/members/:classid', (0, check_token_1.checktoken)(["teacher"]), async (req, res) => {
+exports.router.get('/members/:classid', (0, check_token_1.checktoken)(["teacher", "student"]), async (req, res) => {
     try {
         const { classid } = req.params;
         const alldetails = await fromclass.getallclassid(classid);
-        // console.log(allstudents);
         let allstudents = [];
         for (let i = 0; i < alldetails.length; i++) {
             let student = await fromusers.get_one(alldetails[i].studentid);

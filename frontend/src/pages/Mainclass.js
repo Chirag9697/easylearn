@@ -34,6 +34,15 @@ import {
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { useDisclosure } from "@chakra-ui/react";
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
+  AlertDialogCloseButton,
+} from '@chakra-ui/react'
 const socket = io.connect("http://localhost:3001");
 const ROOT_CSS = css({
   height: 600,
@@ -42,13 +51,13 @@ const ROOT_CSS = css({
 export default function Mainclass() {
   const { id } = useParams();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen:isOpen3, onOpen:onOpen3, onClose:onClose3 } = useDisclosure()
   const {
     isOpen: isOpen2,
     onOpen: onOpen2,
     onClose: onClose2,
   } = useDisclosure();
   const states = useSelector((state) => state.rolesdata);
-  console.log(states);
   const toast = useToast();
   const [message, setMessage] = useState("");
   
@@ -58,6 +67,7 @@ export default function Mainclass() {
   const [announcements, setAnnouncements] = useState([]);
   const [announcementmessage, setAnnouncementmessage] = useState("");
   const ref = useRef(null);
+  const cancelRef = React.useRef()
   const handleannouncement = (e) => {
     setAnnouncementmessage(e.target.value);
   };
@@ -89,6 +99,7 @@ export default function Mainclass() {
       `http://localhost:3001/api/v1/classes/members/${id}`,
       requestOptions
     );
+    console.log(allstudents);
     if(allstudents.data.error){
       toast({
         title: "error message",
@@ -173,9 +184,10 @@ export default function Mainclass() {
 
     console.log(id);
     const allmessages = await axios.get(
-      `http://localhost:3001/api/v1/announcements/${id}/${states.userid}`,
+      `http://localhost:3001/api/v1/announcements/${id}/${localStorage.getItem("userid")}`,
       requestOptions
     );
+    console.log(allmessages);
     if(allmessages.data.error){
       toast({
         title: "error message",
@@ -187,7 +199,8 @@ export default function Mainclass() {
       return;
     }
     setAnnouncements(allmessages.data.announcements);
-    console.log("helo",allmessages);
+   
+    // console.log("helo",allmessages);
   };
   const handleannouncementsubmit = async (e) => {
     e.preventDefault();
@@ -199,7 +212,7 @@ export default function Mainclass() {
       },
     };
     const obj = {
-      teacherid: states.userid,
+      teacherid: localStorage.getItem("userid"),
       classid: id,
       message: announcementmessage,
     };
@@ -220,6 +233,14 @@ export default function Mainclass() {
       return;
     }
     console.log("announcemnts",addannouncements);
+    onClose2();
+    toast({
+      title: "success message",
+      description: `announcement successully added`,
+      status: "success",
+      duration: 1000,
+      isClosable: true,
+    });
     getallannouncements();
   };
   const handledeleteannouncements = async (id) => {
@@ -232,7 +253,6 @@ export default function Mainclass() {
     };
     const deleteannouncements = await axios.delete(
       `http://localhost:3001/api/v1/announcements/${id}`,
-
       requestOptions
     );
     if(deleteannouncements.data.error){
@@ -246,6 +266,7 @@ export default function Mainclass() {
       return;
     }
     getallannouncements();
+    onClose3();
     //     };
   };
   const gettingannouncement = () => {
@@ -261,7 +282,7 @@ export default function Mainclass() {
       <h1>Main class</h1>
       <div>
         <Button onClick={gettingannouncement}>View Announcements</Button>
-        {states.role == "teacher" && (
+        {localStorage.getItem("role")==="teacher" && (
           <Button onClick={onOpen2}>ADD Announcements</Button>
         )}
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -273,10 +294,38 @@ export default function Mainclass() {
               {
                 announcements.map((announcement)=>{
                   return (
+                    <>
                     <div key={announcement.id}>
                       <p>{announcement.message}</p>
-                      {states.role=="teacher" && <Button onClick={()=>handledeleteannouncements(announcement.id)}>Delete</Button>}
+                      {localStorage.getItem("role")=="teacher" && <Button colorScheme="red" onClick={()=>onOpen3()}>Delete</Button>}
                     </div>
+                     <AlertDialog
+                     isOpen={isOpen3}
+                     leastDestructiveRef={cancelRef}
+                     onClose={onClose3}
+                     >
+                     <AlertDialogOverlay>
+                       <AlertDialogContent>
+                         <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                           Delete Customer
+                         </AlertDialogHeader>
+             
+                         <AlertDialogBody>
+                           Are you sure? You can't undo this action afterwards.
+                         </AlertDialogBody>
+             
+                         <AlertDialogFooter>
+                           <Button ref={cancelRef} onClick={onClose3}>
+                             Cancel
+                           </Button>
+                           <Button colorScheme='red' onClick={()=>handledeleteannouncements(announcement.id)} ml={3}>
+                             Delete
+                           </Button>
+                         </AlertDialogFooter>
+                       </AlertDialogContent>
+                     </AlertDialogOverlay>
+                   </AlertDialog>
+              </>
                   )
                 })
               }
@@ -308,6 +357,7 @@ export default function Mainclass() {
             </ModalFooter>
           </ModalContent>
         </Modal>
+       
       </div>
       <div className="flex">
         <div className="w-80">

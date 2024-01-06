@@ -73,6 +73,7 @@ export default function Logincard(props) {
       return;
     }
     console.log(getid);
+    localStorage.setItem("userid",getid.data.details.id);
     const newobj={teacherid:getid.data.details.id,role:props.role};
     console.log(localStorage.getItem('token'));
     toast({

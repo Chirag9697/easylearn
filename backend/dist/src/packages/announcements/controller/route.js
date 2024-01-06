@@ -32,14 +32,26 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const check_token_1 = require("../../../utils/check-token");
 const fromannouncements = __importStar(require("../../announcements"));
+const frompparentclass = __importStar(require("../../parentclass"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 exports.router = express_1.default.Router();
 exports.router.get('/:classid/:teacherid', (0, check_token_1.checktoken)(['teacher', 'student']), async (req, res) => {
     try {
-        const { classid, teacherid } = req.params;
-        const allannouncement = await fromannouncements.getallannouncementc(classid, teacherid);
-        res.send({ announcements: allannouncement });
+        if (req.user.role === "teacher") {
+            const { classid, teacherid } = req.params;
+            // console.log("hello",req.user);
+            const allannouncement = await fromannouncements.getallannouncementc(classid, teacherid);
+            console.log(allannouncement);
+            res.send({ announcements: allannouncement });
+        }
+        else {
+            const { classid } = req.params;
+            const getteacherid = await frompparentclass.get_one(classid);
+            const { teacherid } = getteacherid;
+            const allannouncement = await fromannouncements.getallannouncementc(classid, teacherid);
+            res.send({ announcements: allannouncement });
+        }
     }
     catch (error) {
         res.send({ error: error });

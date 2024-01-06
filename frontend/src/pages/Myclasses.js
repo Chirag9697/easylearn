@@ -4,6 +4,7 @@ import { Button, Flex, useDisclosure } from "@chakra-ui/react";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
+import { useToast } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
 import {
   Modal,
@@ -65,7 +66,6 @@ export default function Myclasses() {
   };
   const getallstudents = async () => {
     const requestOptions = {
-      // method: "GET",
       headers: {
         "Content-Type": "application/json",
         token: localStorage["token"],
@@ -75,7 +75,7 @@ export default function Myclasses() {
       "http://localhost:3001/api/v1/users/",
       requestOptions
     );
-
+    console.log("hello",myaccdet);
     setAllstudents(myaccdet.data.allstudents);
   };
   const handleonchange = (event) => {
@@ -96,7 +96,7 @@ export default function Myclasses() {
         token: localStorage["token"],
       },
     };
-    const item = { classname: "temporary", members: newmembers };
+    const item = { classname: "temporary", members: newmembers,teacherid:localStorage.getItem("userid")};
     const myaccdet = await axios.post(
       "http://localhost:3001/api/v1/classes",
       item,

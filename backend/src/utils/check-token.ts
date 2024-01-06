@@ -23,6 +23,7 @@ export const checktoken=(rolesdata:any)=>{
             const{role}=user;
             req.user.role=role;
             console.log(user);
+            console.log("hello",rolesdata);
 
             if(!rolesdata.includes(user.role)){
                 return res.status(200).send({error:"not accessible"});

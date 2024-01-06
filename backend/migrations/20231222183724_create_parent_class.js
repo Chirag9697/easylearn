@@ -7,6 +7,7 @@ exports.up = function(knex) {
     .createTable('parentclass', function (table) {
         table.increments('id');
         table.string('classname').notNullable();
+        table.string('teacherid').notNullable();
     })
 };
 

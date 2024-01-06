@@ -31,8 +31,6 @@ router.post('/register',async(req,res)=>{
 
 router.delete('/deleteuser/:id',async(req,res)=>{
     console.log("delete this user please");
-
-    
     const{id}=req.params;
     console.log("id of the user",id);
     try{
