@@ -43,6 +43,9 @@ import {
   AlertDialogOverlay,
   AlertDialogCloseButton,
 } from '@chakra-ui/react'
+import ReactPlayer from 'react-player';
+// import { useCallback } from "react";
+import { useCallback } from "react";
 const socket = io.connect("http://localhost:3001");
 const ROOT_CSS = css({
   height: 600,
@@ -65,17 +68,21 @@ export default function Mainclass() {
   const [messages, setMessages] = useState([]);
   const [allmembers, setAllmembers] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+  const [myStream, setMyStream] = useState();
   const [announcementmessage, setAnnouncementmessage] = useState("");
   const ref = useRef(null);
   const cancelRef = React.useRef()
   const handleannouncement = (e) => {
     setAnnouncementmessage(e.target.value);
   };
-  socket.on("connect", () => {
-    socket.emit("joinroom", id);
-    console.log("Connected to server");
+  const handleCallUser = useCallback(async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: { width: 1280, height: 720 },
+    });
+    setMyStream(stream);
   });
-
+ 
   socket.on("disconnect", () => {
     console.log("Disconnected from server");
   });
@@ -274,12 +281,39 @@ export default function Mainclass() {
     onOpen();
   };
   useEffect(() => {
+    socket.on("connect", () => {
+      socket.emit("joinroom", id);
+      console.log("Connected to server");
+    });
     getallmembers();
+    return () => {
+      socket.off("connect");
+      // socket.off("noonetyping");
+      // socket.off("receivemessage");
+      
+    };
   }, []);
 
   return (
     <div>
       <h1>Main class</h1>
+      <div>
+          <Button colorScheme="red" onClick={handleCallUser}>Start Class</Button>
+        <div>
+        {myStream && (
+          <>
+          <h1>My Stream</h1>
+          <ReactPlayer
+            playing
+            muted
+            height="1000px"
+            width="1000px"
+            url={myStream}
+          />
+        </>
+      )}
+        </div>
+      </div>
       <div>
         <Button onClick={gettingannouncement}>View Announcements</Button>
         {localStorage.getItem("role")==="teacher" && (
@@ -365,7 +399,7 @@ export default function Mainclass() {
           <div className="p-4 bg-gray-400 h-96 flex flex-col border-black overflow-scroll overflow-x-hidden">
             {allmembers.map((member) => {
               return (
-                <Card className="flex p-1">
+                <Card className="flex p-1 mb-2">
                   <WrapItem>
                     <Avatar
                       sx={{ marginTop: "0.2rem" }}

@@ -58,22 +58,47 @@ exports.app.use(`/${initial}/classes`, fromclass.router);
 exports.app.use(`/${initial}/users`, fromuser.router);
 exports.app.use(`/${initial}/announcements`, fromannouncement.router);
 io.on('connection', (socket) => {
-    // console.log('A user connected');
     socket.on("joinroom", (data) => {
-        socket.join(data);
-        console.log("person is connected to room");
+        var rooms = io.sockets.adapter.rooms;
+        var room = rooms.get(data);
+        if (room == undefined) {
+            socket.join(data);
+            socket.emit("created");
+        }
+        else {
+            socket.join(data);
+            socket.emit("joined");
+        }
+        console.log("rooms");
+        console.log(rooms);
+    });
+    socket.on("ready", (roomname) => {
+        console.log("Ready");
+        socket.broadcast.to(roomname).emit("ready");
+    });
+    socket.on("candidate", (candidate, roomName) => {
+        console.log("candidate");
+        socket.broadcast.to(roomName).emit("candidate", candidate);
+    });
+    socket.on("offer", (offer, roomName) => {
+        console.log("offer");
+        socket.broadcast.to(roomName).emit("offer", offer);
+    });
+    socket.on("answer", (answer, roomName) => {
+        console.log("answer");
+        socket.broadcast.to(roomName).emit("answer", answer);
     });
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });
     socket.on("typing", (args) => {
-        socket.to(args.room).emit("someonetyping", args);
+        socket.broadcast.to(args.room).emit("someonetyping", args);
     });
     socket.on("nottyping", (args) => {
-        socket.to(args.room).emit("noonetyping", args);
+        socket.broadcast.to(args.room).emit("noonetyping", args);
     });
     socket.on("sendmessage", (args) => {
-        socket.to(args.room).emit("receivemessage", args);
+        socket.broadcast.to(args.room).emit("receivemessage", args);
     });
 });
 //   httpsServer.listen(3000);
