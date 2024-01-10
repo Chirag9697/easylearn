@@ -44,6 +44,7 @@ import {
   AlertDialogCloseButton,
 } from '@chakra-ui/react'
 import ReactPlayer from 'react-player';
+import peer from "../service/peer";
 // import { useCallback } from "react";
 import { useCallback } from "react";
 const socket = io.connect("http://localhost:3001");
@@ -69,30 +70,36 @@ export default function Mainclass() {
   const [allmembers, setAllmembers] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [myStream, setMyStream] = useState();
+  const [remotestream, setRemoteStream] = useState();
   const [announcementmessage, setAnnouncementmessage] = useState("");
   const ref = useRef(null);
   const cancelRef = React.useRef()
   const handleannouncement = (e) => {
     setAnnouncementmessage(e.target.value);
   };
+
+  
+  
+  //use to start the class
   const handleCallUser = useCallback(async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: { width: 1280, height: 720 },
     });
+    const offer=await peer.getOffer();
+    socket.emit("offer",{offer,id});
+
     setMyStream(stream);
   });
  
-  socket.on("disconnect", () => {
-    console.log("Disconnected from server");
-  });
   const handlemessage = (e) => {
     if (e.target.value.length == 0) {
       socket.emit("nottyping", socket.id);
     }
     setMessage(e.target.value);
   };
-
+  
+  //getting all members of the class
   const getallmembers = async () => {
     const requestOptions = {
       method: "GET",
@@ -120,6 +127,9 @@ export default function Mainclass() {
     // console.log(allstudents.data.allstudents);
     setAllmembers(allstudents.data.allstudents);
   };
+
+
+  //send the messages in the chats
   const sendmessage = async (e) => {
     e.preventDefault();
     await socket.emit("sendmessage", {
@@ -146,6 +156,8 @@ export default function Mainclass() {
     setMessage("");
     socket.emit("nottyping", socket.id);
   };
+
+  //used for showing someone is typing
   const typingevent = (e) => {
     if (message.length > 0) {
       socket.emit("typing", socket.id);
@@ -153,33 +165,8 @@ export default function Mainclass() {
       socket.emit("nottyping", socket.id);
     }
   };
-  useEffect(() => {
-    socket.on("someonetyping", (args) => {
-      if (socket.id != args) {
-        setTyping(true);
-      }
-    });
-    socket.on("noonetyping", (args) => {
-      setTyping(false);
-    });
-    socket.on("receivemessage", (args) => {
-      console.log("message received");
-      setMessages((list) => [...list, args]);
-      console.log("messages", messages);
-    });
-    return () => {
-      socket.off("someonetyping");
-      socket.off("noonetyping");
-      socket.off("receivemessage");
-    };
-    //  socket.off("receivemessage");
-  }, [socket]);
-  useEffect(() => {
-    ref.current?.scrollIntoView({
-      behaviour: "smooth",
-      block: "end",
-    });
-  }, [messages.length]);
+
+  //used to get all the announcments   
   const getallannouncements = async () => {
     const requestOptions = {
       method: "GET",
@@ -205,10 +192,11 @@ export default function Mainclass() {
       });
       return;
     }
-    setAnnouncements(allmessages.data.announcements);
-   
-    // console.log("helo",allmessages);
+    setAnnouncements(allmessages.data.announcements);   
   };
+
+
+  //it is used to add announcements
   const handleannouncementsubmit = async (e) => {
     e.preventDefault();
     const requestOptions = {
@@ -250,6 +238,8 @@ export default function Mainclass() {
     });
     getallannouncements();
   };
+
+  //use to delete the announcements
   const handledeleteannouncements = async (id) => {
     const requestOptions = {
       method: "GET",
@@ -274,17 +264,113 @@ export default function Mainclass() {
     }
     getallannouncements();
     onClose3();
-    //     };
   };
+
+  //showing all the announmenet in the dialog box 
   const gettingannouncement = () => {
     getallannouncements();
     onOpen();
   };
+
+
+
+  useEffect(()=>{
+    peer.peer.addEventListener('negotiationneeded',async()=>{
+      const offer=await peer.getOffer();
+      socket.emit('negoneeded',{id,offer})
+    })
+    return ()=>{
+      peer.peer.removeEventListener("negotiationneeded",async()=>{
+        const offer=await peer.getOffer();
+        socket.emit('negoneeded',{id,offer})
+      })
+    }
+  },[socket])
+
+
+  useEffect(()=>{
+    peer.peer.addEventListener('track',async ev=>{
+      const remotestream=ev.streams;
+      setRemoteStream(remotestream[0]);
+    })
+  })
+
+
+  useEffect(() => {
+    socket.on("someonetyping", (args) => {
+      if (socket.id != args) {
+        setTyping(true);
+      }
+    });
+    socket.on("noonetyping", (args) => {
+      setTyping(false);
+    });
+    socket.on("receivemessage", (args) => {
+      console.log("message received");
+      setMessages((list) => [...list, args]);
+      console.log("messages", messages);
+    });
+    socket.on("offer",async(data)=>{
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: { width: 1280, height: 720 },
+      });
+      setMyStream(stream);
+      const ans=await peer.getAnswer(data);
+      socket.emit("answer",{id,ans});
+
+
+    })
+    socket.on("answer",(data)=>{
+      peer.setLocalDescription(data);
+      console.log("call accepte");
+      for(const track of myStream.getTracks()){
+        peer.peer.addTrack(track,myStream);
+      }
+    })
+    socket.on("negotiationneeded",async(offer)=>{
+      const ans=await peer.getAnswer(offer);
+      socket.emit("negotiationdone",{id,offer});
+    })
+    socket.on("negotiationdone",async(offer)=>{
+      // const ans=peer.getAnswer(offer);
+      // socket.emit("negotiationdone",{id,offer});
+      await peer.setLocalDescription(offer);
+    })
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+    return () => {
+      socket.off("someonetyping");
+      socket.off("noonetyping");
+      socket.off("receivemessage");
+      socket.off("offer");
+      socket.off("negotiationneeded");
+      socket.off("negotiationdone");
+      socket.off("disconnect");
+    };
+    //  socket.off("receivemessage");
+  }, [socket]);
+
+
+
+  useEffect(() => {
+    ref.current?.scrollIntoView({
+      behaviour: "smooth",
+      block: "end",
+    });
+  }, [messages.length]);
+
+
+ 
+  
   useEffect(() => {
     socket.on("connect", () => {
       socket.emit("joinroom", id);
       console.log("Connected to server");
     });
+
     getallmembers();
     return () => {
       socket.off("connect");
@@ -298,7 +384,10 @@ export default function Mainclass() {
     <div>
       <h1>Main class</h1>
       <div>
+        {
+          localStorage.getItem("role")=="teacher" && 
           <Button colorScheme="red" onClick={handleCallUser}>Start Class</Button>
+        }
         <div>
         {myStream && (
           <>
@@ -309,6 +398,18 @@ export default function Mainclass() {
             height="1000px"
             width="1000px"
             url={myStream}
+          />
+        </>
+      )}
+        {remotestream && (
+          <>
+          <h1>My Stream</h1>
+          <ReactPlayer
+            playing
+            muted
+            height="1000px"
+            width="1000px"
+            url={remotestream}
           />
         </>
       )}
