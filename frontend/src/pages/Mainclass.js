@@ -23,6 +23,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useToast } from "@chakra-ui/react";
 // import useParams from 'react-router-dom';
+import peer from "../service/peer";
 import {
   Modal,
   ModalOverlay,
@@ -42,9 +43,12 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   AlertDialogCloseButton,
-} from '@chakra-ui/react'
-import ReactPlayer from 'react-player';
-import peer from "../service/peer";
+} from "@chakra-ui/react";
+import ReactPlayer from "react-player";
+import { IoSendOutline } from "react-icons/io5";
+// import peer from "../service/peer";
+import Peer from "simple-peer";
+import styled from "styled-components";
 // import { useCallback } from "react";
 import { useCallback } from "react";
 const socket = io.connect("http://localhost:3001");
@@ -52,10 +56,51 @@ const ROOT_CSS = css({
   height: 600,
   width: 400,
 });
+
+const Container = styled.div`
+  padding: 20px;
+  display: flex;
+  height: 100vh;
+  width: 90%;
+  margin: auto;
+  flex-wrap: wrap;
+`;
+
+const StyledVideo = styled.video`
+  height: 40%;
+  width: 50%;
+`;
+
+const Video = (props) => {
+  const ref = useRef();
+  console.log("sdsad");
+  useEffect(() => {
+    props.peer.on("stream", (stream) => {
+      ref.current.srcObject = stream;
+    });
+  }, []);
+
+  return <StyledVideo playsInline autoPlay ref={ref} />;
+};
+
+const videoConstraints = {
+  height: window.innerHeight / 2,
+  width: window.innerWidth / 2,
+};
+
 export default function Mainclass() {
+  const [peers, setPeers] = useState([]);
+  const socketRef = useRef();
+  const userVideo = useRef();
+  const peersRef = useRef([]);
   const { id } = useParams();
+  const roomID = id + 2000;
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isOpen:isOpen3, onOpen:onOpen3, onClose:onClose3 } = useDisclosure()
+  const {
+    isOpen: isOpen3,
+    onOpen: onOpen3,
+    onClose: onClose3,
+  } = useDisclosure();
   const {
     isOpen: isOpen2,
     onOpen: onOpen2,
@@ -64,7 +109,7 @@ export default function Mainclass() {
   const states = useSelector((state) => state.rolesdata);
   const toast = useToast();
   const [message, setMessage] = useState("");
-  
+
   const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState([]);
   const [allmembers, setAllmembers] = useState([]);
@@ -73,32 +118,30 @@ export default function Mainclass() {
   const [remotestream, setRemoteStream] = useState();
   const [announcementmessage, setAnnouncementmessage] = useState("");
   const ref = useRef(null);
-  const cancelRef = React.useRef()
+  const cancelRef = React.useRef();
   const handleannouncement = (e) => {
     setAnnouncementmessage(e.target.value);
   };
 
-  
-  
   //use to start the class
-  const handleCallUser = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: { width: 1280, height: 720 },
-    });
-    const offer=await peer.getOffer();
-    socket.emit("offer",{offer,id});
+  // const handleCallUser = useCallback(async () => {
+  //   const stream = await navigator.mediaDevices.getUserMedia({
+  //     audio: true,
+  //     video: { width: 1280, height: 720 },
+  //   });
+  //   // const offer=await peer.getOffer();
+  //   // socket.emit("offer",{offer,id});
 
-    setMyStream(stream);
-  });
- 
+  //   setMyStream(stream);
+  // });
+
   const handlemessage = (e) => {
     if (e.target.value.length == 0) {
       socket.emit("nottyping", socket.id);
     }
     setMessage(e.target.value);
   };
-  
+
   //getting all members of the class
   const getallmembers = async () => {
     const requestOptions = {
@@ -113,8 +156,8 @@ export default function Mainclass() {
       `http://localhost:3001/api/v1/classes/members/${id}`,
       requestOptions
     );
-    console.log(allstudents);
-    if(allstudents.data.error){
+    console.log("allstudents", allstudents);
+    if (allstudents.data.error) {
       toast({
         title: "error message",
         description: `${allstudents.data.error}`,
@@ -127,7 +170,6 @@ export default function Mainclass() {
     // console.log(allstudents.data.allstudents);
     setAllmembers(allstudents.data.allstudents);
   };
-
 
   //send the messages in the chats
   const sendmessage = async (e) => {
@@ -160,13 +202,13 @@ export default function Mainclass() {
   //used for showing someone is typing
   const typingevent = (e) => {
     if (message.length > 0) {
-      socket.emit("typing", socket.id);
+      socket.emit("typing", id);
     } else {
-      socket.emit("nottyping", socket.id);
+      socket.emit("nottyping", id);
     }
   };
 
-  //used to get all the announcments   
+  //used to get all the announcments
   const getallannouncements = async () => {
     const requestOptions = {
       method: "GET",
@@ -178,11 +220,13 @@ export default function Mainclass() {
 
     console.log(id);
     const allmessages = await axios.get(
-      `http://localhost:3001/api/v1/announcements/${id}/${localStorage.getItem("userid")}`,
+      `http://localhost:3001/api/v1/announcements/${id}/${localStorage.getItem(
+        "userid"
+      )}`,
       requestOptions
     );
     console.log(allmessages);
-    if(allmessages.data.error){
+    if (allmessages.data.error) {
       toast({
         title: "error message",
         description: `${allmessages.data.error}`,
@@ -192,9 +236,8 @@ export default function Mainclass() {
       });
       return;
     }
-    setAnnouncements(allmessages.data.announcements);   
+    setAnnouncements(allmessages.data.announcements);
   };
-
 
   //it is used to add announcements
   const handleannouncementsubmit = async (e) => {
@@ -211,13 +254,13 @@ export default function Mainclass() {
       classid: id,
       message: announcementmessage,
     };
-    console.log("dsfasdf",obj);
+    console.log("dsfasdf", obj);
     const addannouncements = await axios.post(
       `http://localhost:3001/api/v1/announcements/`,
       obj,
-      requestOptions,
+      requestOptions
     );
-    if(addannouncements.data.error){
+    if (addannouncements.data.error) {
       toast({
         title: "error message",
         description: `${addannouncements.data.error}`,
@@ -227,7 +270,7 @@ export default function Mainclass() {
       });
       return;
     }
-    console.log("announcemnts",addannouncements);
+    console.log("announcemnts", addannouncements);
     onClose2();
     toast({
       title: "success message",
@@ -252,7 +295,7 @@ export default function Mainclass() {
       `http://localhost:3001/api/v1/announcements/${id}`,
       requestOptions
     );
-    if(deleteannouncements.data.error){
+    if (deleteannouncements.data.error) {
       toast({
         title: "error message",
         description: `${deleteannouncements.data.error}`,
@@ -266,38 +309,49 @@ export default function Mainclass() {
     onClose3();
   };
 
-  //showing all the announmenet in the dialog box 
+  //showing all the announmenet in the dialog box
   const gettingannouncement = () => {
     getallannouncements();
     onOpen();
   };
 
+  // function createPeer(userToSignal, callerID, stream) {
+  //   const peer = new Peer({
+  //     initiator: true,
+  //     trickle: false,
+  //     stream,
+  //   });
 
+  //   peer.on("signal", (signal) => {
+  //     socketRef.current.emit("sending signal", {
+  //       userToSignal,
+  //       callerID,
+  //       signal,
+  //     });
+  //   });
 
-  useEffect(()=>{
-    peer.peer.addEventListener('negotiationneeded',async()=>{
-      const offer=await peer.getOffer();
-      socket.emit('negoneeded',{id,offer})
-    })
-    return ()=>{
-      peer.peer.removeEventListener("negotiationneeded",async()=>{
-        const offer=await peer.getOffer();
-        socket.emit('negoneeded',{id,offer})
-      })
-    }
-  },[socket])
+  //   return peer;
+  // }
 
+  // function addPeer(incomingSignal, callerID, stream) {
+  //     const peer = new Peer({
+  //         initiator: false,
+  //         trickle: false,
+  //         stream,
+  //     })
 
-  useEffect(()=>{
-    peer.peer.addEventListener('track',async ev=>{
-      const remotestream=ev.streams;
-      setRemoteStream(remotestream[0]);
-    })
-  })
+  //     peer.on("signal", signal => {
+  //         socketRef.current.emit("returning signal", { signal, callerID })
+  //     })
 
+  //     peer.signal(incomingSignal);
+
+  //     return peer;
+  // }
 
   useEffect(() => {
     socket.on("someonetyping", (args) => {
+      console.log("someone is typing");
       if (socket.id != args) {
         setTyping(true);
       }
@@ -310,33 +364,6 @@ export default function Mainclass() {
       setMessages((list) => [...list, args]);
       console.log("messages", messages);
     });
-    socket.on("offer",async(data)=>{
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: { width: 1280, height: 720 },
-      });
-      setMyStream(stream);
-      const ans=await peer.getAnswer(data);
-      socket.emit("answer",{id,ans});
-
-
-    })
-    socket.on("answer",(data)=>{
-      peer.setLocalDescription(data);
-      console.log("call accepte");
-      for(const track of myStream.getTracks()){
-        peer.peer.addTrack(track,myStream);
-      }
-    })
-    socket.on("negotiationneeded",async(offer)=>{
-      const ans=await peer.getAnswer(offer);
-      socket.emit("negotiationdone",{id,offer});
-    })
-    socket.on("negotiationdone",async(offer)=>{
-      // const ans=peer.getAnswer(offer);
-      // socket.emit("negotiationdone",{id,offer});
-      await peer.setLocalDescription(offer);
-    })
 
     socket.on("disconnect", () => {
       console.log("Disconnected from server");
@@ -345,15 +372,10 @@ export default function Mainclass() {
       socket.off("someonetyping");
       socket.off("noonetyping");
       socket.off("receivemessage");
-      socket.off("offer");
-      socket.off("negotiationneeded");
-      socket.off("negotiationdone");
+
       socket.off("disconnect");
     };
-    //  socket.off("receivemessage");
   }, [socket]);
-
-
 
   useEffect(() => {
     ref.current?.scrollIntoView({
@@ -362,9 +384,6 @@ export default function Mainclass() {
     });
   }, [messages.length]);
 
-
- 
-  
   useEffect(() => {
     socket.on("connect", () => {
       socket.emit("joinroom", id);
@@ -374,148 +393,185 @@ export default function Mainclass() {
     getallmembers();
     return () => {
       socket.off("connect");
-      // socket.off("noonetyping");
-      // socket.off("receivemessage");
-      
     };
   }, []);
 
+  //   useEffect(() => {
+  //     socketRef.current = io.connect("http://localhost:3001");
+  //     navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true }).then(stream => {
+  //         userVideo.current.srcObject = stream;
+  //         socketRef.current.emit("join room2", roomID);
+  //         socketRef.current.on("all users", users => {
+  //             const peers = [];
+  //             users.forEach(userID => {
+  //                 const peer = createPeer(userID, socketRef.current.id, stream);
+  //                 peersRef.current.push({
+  //                     peerID: userID,
+  //                     peer,
+  //                 })
+  //                 peers.push(peer);
+  //             })
+  //             console.log("dcadc",peers);
+  //             setPeers(peers);
+  //         })
+
+  //         socketRef.current.on("user joined", payload => {
+  //             const peer = addPeer(payload.signal, payload.callerID, stream);
+  //             peersRef.current.push({
+  //                 peerID: payload.callerID,
+  //                 peer,
+  //             })
+
+  //             setPeers(users => [...users, peer]);
+  //         });
+
+  //         socketRef.current.on("receiving returned signal", payload => {
+  //             const item = peersRef.current.find(p => p.peerID === payload.id);
+  //             item.peer.signal(payload.signal);
+  //         });
+  //     })
+  // }, []);
+
   return (
-    <div>
-      <h1>Main class</h1>
-      <div>
-        {
-          localStorage.getItem("role")=="teacher" && 
-          <Button colorScheme="red" onClick={handleCallUser}>Start Class</Button>
-        }
-        <div>
-        {myStream && (
-          <>
-          <h1>My Stream</h1>
-          <ReactPlayer
-            playing
-            muted
-            height="1000px"
-            width="1000px"
-            url={myStream}
-          />
-        </>
-      )}
-        {remotestream && (
-          <>
-          <h1>My Stream</h1>
-          <ReactPlayer
-            playing
-            muted
-            height="1000px"
-            width="1000px"
-            url={remotestream}
-          />
-        </>
-      )}
+    <div
+      className="flex justify-between  w-full p-2"
+      style={{ height: "100vh" }}
+    >
+      <div className="w-80">
+        <div className="bg-gray-400 flex justify-center">
+          <h1>Students</h1>
+        </div>
+        <div className="p-4 bg-gray-400 h-96 flex flex-col border-black overflow-scroll overflow-x-hidden">
+          {allmembers.map((member) => {
+            return (
+              <Card className="flex p-1 mb-2">
+                <WrapItem>
+                  <Avatar
+                    sx={{ marginTop: "0.2rem" }}
+                    name={member.name}
+                    src="https://bit.ly/tioluwani-kolawole"
+                  />
+                  <CardBody>
+                    <Text>{member.name}</Text>
+                  </CardBody>
+                </WrapItem>
+              </Card>
+            );
+          })}
         </div>
       </div>
-      <div>
-        <Button onClick={gettingannouncement}>View Announcements</Button>
-        {localStorage.getItem("role")==="teacher" && (
-          <Button onClick={onOpen2}>ADD Announcements</Button>
-        )}
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Announcements</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              {
-                announcements.map((announcement)=>{
+      <div className=" h-full w-3/4 flex flex-col items-center">
+        <div className="bg-black w-3 h-5/6" style={{ width: "49vw" }}>
+          hello
+        </div>
+        <div className="mt-3">
+          {localStorage.getItem("role") == "teacher" && (
+            <Button colorScheme="red">Start Class</Button>
+          )}
+        </div>
+        <div
+          className=" mt-4 flex justify-center justify-between"
+          style={{ width: "40vw" }}
+        >
+          {/* <div className="bg-red-600 flex w-24 justify-center"> */}
+
+          <Button colorScheme="blue" onClick={gettingannouncement}>
+            View Announcements
+          </Button>
+          {localStorage.getItem("role") === "teacher" && (
+            <Button colorScheme="blue" onClick={onOpen2}>
+              ADD Announcements
+            </Button>
+          )}
+          {/* </div> */}
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Announcements</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                {announcements.map((announcement) => {
                   return (
                     <>
-                    <div key={announcement.id}>
-                      <p>{announcement.message}</p>
-                      {localStorage.getItem("role")=="teacher" && <Button colorScheme="red" onClick={()=>onOpen3()}>Delete</Button>}
-                    </div>
-                     <AlertDialog
-                     isOpen={isOpen3}
-                     leastDestructiveRef={cancelRef}
-                     onClose={onClose3}
-                     >
-                     <AlertDialogOverlay>
-                       <AlertDialogContent>
-                         <AlertDialogHeader fontSize='lg' fontWeight='bold'>
-                           Delete Customer
-                         </AlertDialogHeader>
-             
-                         <AlertDialogBody>
-                           Are you sure? You can't undo this action afterwards.
-                         </AlertDialogBody>
-             
-                         <AlertDialogFooter>
-                           <Button ref={cancelRef} onClick={onClose3}>
-                             Cancel
-                           </Button>
-                           <Button colorScheme='red' onClick={()=>handledeleteannouncements(announcement.id)} ml={3}>
-                             Delete
-                           </Button>
-                         </AlertDialogFooter>
-                       </AlertDialogContent>
-                     </AlertDialogOverlay>
-                   </AlertDialog>
-              </>
-                  )
-                })
-              }
-            </ModalBody>
+                      <div key={announcement.id}>
+                        <p>{announcement.message}</p>
+                        {localStorage.getItem("role") == "teacher" && (
+                          <Button colorScheme="red" onClick={() => onOpen3()}>
+                            Delete
+                          </Button>
+                        )}
+                      </div>
+                      <AlertDialog
+                        isOpen={isOpen3}
+                        leastDestructiveRef={cancelRef}
+                        onClose={onClose3}
+                      >
+                        <AlertDialogOverlay>
+                          <AlertDialogContent>
+                            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                              Delete Customer
+                            </AlertDialogHeader>
 
-            <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={onClose}>
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-        <Modal isOpen={isOpen2} onClose={onClose2}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Add New Announcement</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <form onSubmit={handleannouncementsubmit}>
-                <Input placeholder="add your announceent" onChange={handleannouncement}/>
-                <Button type="submit">Add</Button>
-              </form>
-            </ModalBody>
+                            <AlertDialogBody>
+                              Are you sure? You can't undo this action
+                              afterwards.
+                            </AlertDialogBody>
 
-            <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={onClose2}>
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-       
-      </div>
-      <div className="flex">
-        <div className="w-80">
-          <h1>members</h1>
-          <div className="p-4 bg-gray-400 h-96 flex flex-col border-black overflow-scroll overflow-x-hidden">
-            {allmembers.map((member) => {
-              return (
-                <Card className="flex p-1 mb-2">
-                  <WrapItem>
-                    <Avatar
-                      sx={{ marginTop: "0.2rem" }}
-                      name={member.name}
-                      src="https://bit.ly/tioluwani-kolawole"
-                    />
-                    <CardBody>
-                      <Text>{member.name}</Text>
-                    </CardBody>
-                  </WrapItem>
-                </Card>
-              );
-            })}
-          </div>
+                            <AlertDialogFooter>
+                              <Button ref={cancelRef} onClick={onClose3}>
+                                Cancel
+                              </Button>
+                              <Button
+                                colorScheme="red"
+                                onClick={() =>
+                                  handledeleteannouncements(announcement.id)
+                                }
+                                ml={3}
+                              >
+                                Delete
+                              </Button>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialogOverlay>
+                      </AlertDialog>
+                    </>
+                  );
+                })}
+              </ModalBody>
+
+              <ModalFooter>
+                <Button colorScheme="blue" mr={3} onClick={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+          <Modal isOpen={isOpen2} onClose={onClose2}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Add New Announcement</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <form onSubmit={handleannouncementsubmit}>
+                  <Input
+                    placeholder="add your announceent"
+                    onChange={handleannouncement}
+                  />
+                  <Button type="submit">Add</Button>
+                </form>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button colorScheme="blue" mr={3} onClick={onClose2}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
         </div>
+      </div>
+
+      <div className="flex">
         <div>
           <div className="w-80 h-96  bg-gray-600 flex flex-col overflow-scroll overflow-x-hidden">
             {messages.map((message, index) => {
@@ -572,7 +628,7 @@ export default function Mainclass() {
                   required
                 />
                 <Button type="submit" colorScheme="blue">
-                  Send
+                  <IoSendOutline />
                 </Button>
               </form>
             </div>

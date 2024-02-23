@@ -34,10 +34,11 @@ const check_token_1 = require("../../../utils/check-token");
 const fromusers = __importStar(require("../../users"));
 const fromclass = __importStar(require("../../classes"));
 const fromparentclass = __importStar(require("../../parentclass"));
+const fromannouncement = __importStar(require("../../announcements"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 exports.router = express_1.default.Router();
-exports.router.post('/', (0, check_token_1.checktoken)(["teacher", "student"]), async (req, res) => {
+exports.router.post('/', (0, check_token_1.checktoken)(["teacher"]), async (req, res) => {
     console.log("adding classroom");
     console.log(req.body);
     const { classname, members, teacherid } = req.body;
@@ -90,12 +91,27 @@ exports.router.get('/members/:classid', (0, check_token_1.checktoken)(["teacher"
     try {
         const { classid } = req.params;
         const alldetails = await fromclass.getallclassid(classid);
+        console.log("allddetails", alldetails);
         let allstudents = [];
         for (let i = 0; i < alldetails.length; i++) {
             let student = await fromusers.get_one(alldetails[i].studentid);
             allstudents.push(student);
         }
         res.send({ allstudents: allstudents });
+    }
+    catch (error) {
+        res.send({ error: error });
+    }
+});
+exports.router.delete('/:classid', (0, check_token_1.checktoken)(["teacher"]), async (req, res) => {
+    try {
+        console.log("deleting");
+        const { classid } = req.params;
+        console.log(classid);
+        const deletefromparentclass = await fromparentclass.deleterecord(classid);
+        const deletefromclass = await fromclass.deleterecordbyclassid(classid);
+        const deletefromannouncement = await fromannouncement.deleterecordbyclassid(classid);
+        res.send({ success: "class successfully deleted" });
     }
     catch (error) {
         res.send({ error: error });

@@ -8,14 +8,16 @@ import * as fromusers from '../../users';
 import * as fromauth from '../../authentication';
 import * as fromclass from '../../classes';
 import * as fromparentclass from '../../parentclass';
+import * as fromannouncement from '../../announcements';
 import { parentclass } from '../../parentclass/domain/parentclass';
+import { checkPrime } from 'crypto';
 dotenv.config();
 
 const app=express();
 export const router=express.Router()
 
 
-router.post('/',checktoken(["teacher","student"]),async(req,res)=>{
+router.post('/',checktoken(["teacher"]),async(req,res)=>{
     console.log("adding classroom");
     console.log(req.body);
     const {classname,members,teacherid}=req.body;
@@ -66,12 +68,27 @@ router.get('/members/:classid',checktoken(["teacher","student"]),async(req,res)=
     try{
         const{classid}=req.params;
         const alldetails=await fromclass.getallclassid(classid);
+        console.log("allddetails",alldetails);
         let allstudents=[];
         for(let i=0;i<alldetails.length;i++){
             let student=await fromusers.get_one(alldetails[i].studentid);
             allstudents.push(student);
         }
         res.send({allstudents:allstudents});
+    }catch(error){
+        res.send({error:error});
+    }
+})
+
+router.delete('/:classid',checktoken(["teacher"]),async(req,res)=>{
+    try{
+        console.log("deleting");
+        const{classid}=req.params;
+        console.log(classid);
+        const deletefromparentclass=await fromparentclass.deleterecord(classid);
+        const deletefromclass=await fromclass.deleterecordbyclassid(classid);
+        const deletefromannouncement=await fromannouncement.deleterecordbyclassid(classid);
+        res.send({success:"class successfully deleted"});
     }catch(error){
         res.send({error:error});
     }

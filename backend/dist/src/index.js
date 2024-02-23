@@ -53,6 +53,8 @@ objection_1.Model.knex((0, knex_1.default)(connection));
 exports.app.use((0, cors_1.default)());
 exports.app.use(express_1.default.json());
 const initial = "api/v1";
+const users = {};
+const socketToRoom = {};
 exports.app.use(`/${initial}/auth`, fromauth.router);
 exports.app.use(`/${initial}/classes`, fromclass.router);
 exports.app.use(`/${initial}/users`, fromuser.router);
@@ -72,40 +74,48 @@ io.on('connection', (socket) => {
         console.log("rooms");
         console.log(rooms);
     });
+    socket.on("join room2", roomID => {
+        if (users[roomID]) {
+            const length = users[roomID].length;
+            console.log(roomID);
+            console.log("joining room");
+            if (length === 4) {
+                socket.emit("room full");
+                return;
+            }
+            users[roomID].push(socket.id);
+        }
+        else {
+            users[roomID] = [socket.id];
+        }
+        socketToRoom[socket.id] = roomID;
+        const usersInThisRoom = users[roomID].filter((id) => id !== socket.id);
+        socket.emit("all users", usersInThisRoom);
+    });
     socket.on("ready", (roomname) => {
         console.log("Ready");
         socket.broadcast.to(roomname).emit("ready");
-    });
-    socket.on("candidate", (candidate, roomName) => {
-        console.log("candidate");
-        socket.broadcast.to(roomName).emit("candidate", candidate);
-    });
-    socket.on("offer", (offer, roomName) => {
-        console.log("offer");
-        console.log(offer);
-        socket.broadcast.to(roomName).emit("offer", offer);
-    });
-    socket.on("answer", (answer, roomName) => {
-        console.log("answer");
-        socket.broadcast.to(roomName).emit("answer", answer);
-    });
-    socket.on('negotiationneeded', (roomname, offer) => {
-        socket.to(roomname).emit("negotiationneeded", offer);
-    });
-    socket.on('negotiationdone', (roomname, offer) => {
-        socket.to(roomname).emit("negotiationdone", offer);
     });
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });
     socket.on("typing", (args) => {
-        socket.broadcast.to(args.room).emit("someonetyping", args);
+        console.log("typing evnet");
+        // console.log(args);
+        socket.in(args).emit("someonetyping", args);
     });
     socket.on("nottyping", (args) => {
-        socket.broadcast.to(args.room).emit("noonetyping", args);
+        socket.in(args).emit("noonetyping", args);
     });
     socket.on("sendmessage", (args) => {
+        console.log("hsdaewd", args);
         socket.broadcast.to(args.room).emit("receivemessage", args);
+    });
+    socket.on("sending signal", payload => {
+        io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID });
+    });
+    socket.on("returning signal", payload => {
+        io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
     });
 });
 //   httpsServer.listen(3000);

@@ -6,6 +6,7 @@ import axios from "axios";
 import { useEffect } from "react";
 import { useToast } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/react";
+import { Input } from '@chakra-ui/react'
 import {
   Modal,
   ModalOverlay,
@@ -18,6 +19,7 @@ import {
 import { Checkbox } from "@chakra-ui/react";
 import { useRef } from "react";
 import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
+import Classcard from "../components/Classcard";
 import { Heading } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 export default function Myclasses() {
@@ -26,7 +28,11 @@ export default function Myclasses() {
   const [allstudents, setAllstudents] = useState([]);
   const [allclasses, setAllclasses] = useState([]);
   const [newmembers, setNewmembers] = useState([]);
+  const[classname,setClassname]=useState("");
   const element=useRef();
+  const handleclassname=(e)=>{
+    setClassname(e.target.value);
+  }
   const getmydetails = async () => {
     const requestOptions = {
       // method: "GET",
@@ -88,6 +94,14 @@ export default function Myclasses() {
     setNewmembers(updatedList);
   };
   const addclassroom = async () => {
+    if(classname.length==0){
+      alert("class name must be given");
+      return;
+    }
+    if(newmembers.length==0){
+      alert("add students");
+      return;
+    }
     console.log("hello");
     const requestOptions = {
       // method: "GET",
@@ -96,7 +110,7 @@ export default function Myclasses() {
         token: localStorage["token"],
       },
     };
-    const item = { classname: "temporary", members: newmembers,teacherid:localStorage.getItem("userid")};
+    const item = { classname: classname, members: newmembers,teacherid:localStorage.getItem("userid")};
     const myaccdet = await axios.post(
       "http://localhost:3001/api/v1/classes",
       item,
@@ -132,28 +146,26 @@ export default function Myclasses() {
         <div
           style={{
             padding:"5rem",
-            display: "flex",
-            justifyContent: "space-between",
-            alignContent: "center",
-            flexWrap: "wrap",
+            display: "grid",
+            gap:"50px 50px",
+            gridTemplateColumns:"repeat(3, 1fr)",
             width: "50%",
             backgroundColor: "whitesmoke",
             border:"1px solid black",
             borderRadius: "5px",
             marginTop: "2rem",
             marginLeft: "5rem",
+            marginBottom:"2rem",  
             overflow: "scroll",
+            overflowX:"hidden",
+            maxHeight:"89vh",
           }}
         >
           {allclasses && allclasses.map((classItem, index) => (
-            <Link to={`/myclasses/${classItem.id}`}>
-            <Card key={index} sx={{cursor:"pointer"}} _hover={{bg:"grey"}}>
-               <CardHeader>
-                <Heading size="md">{classItem.classname}</Heading>
-              </CardHeader>
-              {/* Add other card components as needed */}
-            </Card>
-            </Link>
+
+         
+              <Classcard id={classItem.id} key={index} classname={classItem.classname} getallstufunc={getallclasses}/>
+     
           ))}
         </div>
         {
@@ -166,9 +178,14 @@ export default function Myclasses() {
           <ModalOverlay />
           <ModalContent>
 
-            <ModalHeader>ADD STUDENTS</ModalHeader>
+            <ModalHeader>ADD YOUR CLASS</ModalHeader>
+            <div className="flex flex-col items-center">
+              <p className="font-bold">Enter name of class:</p>
+              <Input style={{width:"25vw"}} placeholder='Enter class name' onChange={handleclassname}  required/>
+            </div>
             <ModalCloseButton />
             <ModalBody>
+              <p className="mt-2 font-semibold text-xl">Add students</p>
               {allstudents && allstudents.map((student) => {
                 return (
                   <Card
@@ -189,10 +206,10 @@ export default function Myclasses() {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={onClose} ref={element}>
+              <Button colorScheme="linkedin" mr={3} onClick={onClose} ref={element}>
                 Close
               </Button>
-              <Button variant="ghost" onClick={addclassroom}>
+              <Button colorScheme="linkedin" variant="solid" onClick={addclassroom}>
                 ADD
               </Button>
             </ModalFooter>

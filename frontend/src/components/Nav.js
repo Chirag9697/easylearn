@@ -47,7 +47,7 @@ export default function Nav(props) {
         </div>
         {
           props.loginstate==false &&
-          <div className={`hidden md:flex justify-between w-48 mr-4`}>
+          <div className={`md:flex justify-between w-48 mr-4`}>
           <Link to="/login">
             <p className="flex items-center p-5 font-semibold hover:cursor-pointer hover:bg-amber-400 hover:transition-shadow transition ease-in duration-150">
               LOGIN
