@@ -21,7 +21,7 @@ export default function Nav(props) {
   return (
     <>
       <div
-        className="flex bg-amber-300 w-full h-16 justify-between"
+        className="flex bg-blue-400 w-full h-16 justify-between"
         style={{ fontFamily: "roboto" }}
       >
         <div className="flex w-64 h-full justify-center items-center font-bold text-3xl hover:cursor-pointer">
@@ -49,12 +49,12 @@ export default function Nav(props) {
           props.loginstate==false &&
           <div className={`md:flex justify-between w-48 mr-4`}>
           <Link to="/login">
-            <p className="flex items-center p-5 font-semibold hover:cursor-pointer hover:bg-amber-400 hover:transition-shadow transition ease-in duration-150">
+            <p className="flex items-center p-5 font-semibold hover:cursor-pointer hover:bg-blue-700 hover:transition-shadow transition ease-in duration-150">
               LOGIN
             </p>
           </Link>
           <Link to="/register">
-            <p className="flex items-center p-5 font-semibold hover:cursor-pointer hover:bg-amber-400 transition ease-in duration-150">
+            <p className="flex items-center p-5 font-semibold hover:cursor-pointer hover:bg-blue-700 transition ease-in duration-150">
               REGISTER
             </p>
           </Link>

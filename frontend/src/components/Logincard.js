@@ -112,7 +112,7 @@ export default function Logincard(props) {
             </Heading>
             <Input name="password" placeholder='Enter your password' className="mb-2" onChange={handleonchange}/>
           </Box>
-          <Button type="submit" className="flex justify-center w-full" style={{backgroundColor:"yellow"}} >LOGIN</Button>
+          <Button type="submit" className="flex justify-center w-full" style={{backgroundColor:"blue"}} >LOGIN</Button>
         </form>
         {/* </Stack> */}
       </CardBody>

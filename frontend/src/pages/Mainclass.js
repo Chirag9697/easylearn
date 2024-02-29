@@ -1,5 +1,5 @@
-import React from "react";
-import { Input } from "@chakra-ui/react";
+import React, { useContext } from "react";
+import { Input, useConst } from "@chakra-ui/react";
 import io from "socket.io-client";
 import { Button, ButtonGroup } from "@chakra-ui/react";
 import {
@@ -11,8 +11,7 @@ import {
 import { useState } from "react";
 import { useEffect } from "react";
 import Lottie from "lottie-react";
-import { Card, CardHeader, CardBody, CardFooter } from "@chakra-ui/react";
-import { Text } from "@chakra-ui/react";
+import { CardFooter } from "@chakra-ui/react";
 import groovyWalkAnimation from "./typing.json";
 import { css } from "@emotion/css";
 import { WrapItem } from "@chakra-ui/react";
@@ -21,6 +20,7 @@ import ScrollToBottom from "react-scroll-to-bottom";
 import { useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import Materialupload from "../components/Materialupload";
 import { useToast } from "@chakra-ui/react";
 // import useParams from 'react-router-dom';
 import peer from "../service/peer";
@@ -44,6 +44,7 @@ import {
   AlertDialogOverlay,
   AlertDialogCloseButton,
 } from "@chakra-ui/react";
+import { CardHeader, CardBody, Card, Heading, Text } from "@chakra-ui/react";
 import ReactPlayer from "react-player";
 import { IoSendOutline } from "react-icons/io5";
 // import peer from "../service/peer";
@@ -51,6 +52,12 @@ import Peer from "simple-peer";
 import styled from "styled-components";
 // import { useCallback } from "react";
 import { useCallback } from "react";
+import Videoplayer from "../components/Videoplayer";
+import Notifications from "../components/Notifications";
+import Options from "../components/Options";
+import { SocketContext } from "../components/Socketcontext";
+import Attendancepercentage from "../components/Attendancepercentage";
+import Attendanceform from "../components/Attendanceform";
 const socket = io.connect("http://localhost:3001");
 const ROOT_CSS = css({
   height: 600,
@@ -89,12 +96,14 @@ const videoConstraints = {
 };
 
 export default function Mainclass() {
+  // const { startclass } = useContext(SocketContext);
   const [peers, setPeers] = useState([]);
   const socketRef = useRef();
   const userVideo = useRef();
   const peersRef = useRef([]);
   const { id } = useParams();
   const roomID = id + 2000;
+  // const { setMe, setCall } = useContext(SocketContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
     isOpen: isOpen3,
@@ -102,14 +111,23 @@ export default function Mainclass() {
     onClose: onClose3,
   } = useDisclosure();
   const {
+    isOpen: isOpen4,
+    onOpen: onOpen4,
+    onClose: onClose4,
+  } = useDisclosure();
+  const {
     isOpen: isOpen2,
     onOpen: onOpen2,
     onClose: onClose2,
   } = useDisclosure();
+  const initialRef = React.useRef(null);
+  const finalRef = React.useRef(null);
+
   const states = useSelector((state) => state.rolesdata);
   const toast = useToast();
   const [message, setMessage] = useState("");
-
+  const [attendanceactive, setattendanceaactive] = useState(false);
+  const [attendanceactiveteacher, setattendanceactiveteacher] = useState(false);
   const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState([]);
   const [allmembers, setAllmembers] = useState([]);
@@ -117,8 +135,14 @@ export default function Mainclass() {
   const [myStream, setMyStream] = useState();
   const [remotestream, setRemoteStream] = useState();
   const [announcementmessage, setAnnouncementmessage] = useState("");
+  const [memberno, setMemberno] = useState(0);
+
   const ref = useRef(null);
   const cancelRef = React.useRef();
+  const handlenumberchange = (e) => {
+    setMemberno(e.target.value);
+  };
+
   const handleannouncement = (e) => {
     setAnnouncementmessage(e.target.value);
   };
@@ -315,39 +339,66 @@ export default function Mainclass() {
     onOpen();
   };
 
-  // function createPeer(userToSignal, callerID, stream) {
-  //   const peer = new Peer({
-  //     initiator: true,
-  //     trickle: false,
-  //     stream,
-  //   });
+  const markattendance=async()=>{
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
+    };
+    const obj={
+      status:true,
+      studentid:localStorage.getItem("userid"),
+      classid:id
+    }
+    const markattendance=await axios.put(
+      `http://localhost:3001/api/v1/attendance/`,
+      obj,
+      requestOptions
+    );
+    console.log(markattendance);
+    if(markattendance.data.success){
+      toast({
+        title: "success message",
+        description: `${markattendance.data.success}`,
+        status: "success",
+        duration: 1000,
+        isClosable: true,
+      });
+      setattendanceaactive(false);
+    }
+  }
 
-  //   peer.on("signal", (signal) => {
-  //     socketRef.current.emit("sending signal", {
-  //       userToSignal,
-  //       callerID,
-  //       signal,
-  //     });
-  //   });
-
-  //   return peer;
-  // }
-
-  // function addPeer(incomingSignal, callerID, stream) {
-  //     const peer = new Peer({
-  //         initiator: false,
-  //         trickle: false,
-  //         stream,
-  //     })
-
-  //     peer.on("signal", signal => {
-  //         socketRef.current.emit("returning signal", { signal, callerID })
-  //     })
-
-  //     peer.signal(incomingSignal);
-
-  //     return peer;
-  // }
+  const createattendanceform = async(e) => {
+    e.preventDefault();
+    socket.emit("attendancecreated", id);
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
+    };
+    for(let i=0;i<allmembers.length;i++){
+      const obj={
+        status:false,
+        studentid:allmembers[i].id,
+        classid:id
+      }
+      const makeattendance= await axios.post(
+        `http://localhost:3001/api/v1/attendance/`,
+        obj,
+        requestOptions
+      );
+    }
+    setattendanceactiveteacher(true);
+    onClose4();
+  };
+  const endattendance = () => {
+    socket.emit("attendanceended", id);
+    setattendanceactiveteacher(false);
+  };
 
   useEffect(() => {
     socket.on("someonetyping", (args) => {
@@ -368,15 +419,24 @@ export default function Mainclass() {
     socket.on("disconnect", () => {
       console.log("Disconnected from server");
     });
+    socket.on("attendancestarted", () => {
+      setattendanceaactive(true);
+    });
+    socket.on("attendancefinish", () => {
+      setattendanceaactive(false);
+    });
+
     return () => {
+      socket.off("attendancestarted");
+      socket.off("attendancefinish");
+      // socket.off("calluser");
       socket.off("someonetyping");
       socket.off("noonetyping");
       socket.off("receivemessage");
-
+      socket.off("me");
       socket.off("disconnect");
     };
   }, [socket]);
-
   useEffect(() => {
     ref.current?.scrollIntoView({
       behaviour: "smooth",
@@ -395,42 +455,6 @@ export default function Mainclass() {
       socket.off("connect");
     };
   }, []);
-
-  //   useEffect(() => {
-  //     socketRef.current = io.connect("http://localhost:3001");
-  //     navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true }).then(stream => {
-  //         userVideo.current.srcObject = stream;
-  //         socketRef.current.emit("join room2", roomID);
-  //         socketRef.current.on("all users", users => {
-  //             const peers = [];
-  //             users.forEach(userID => {
-  //                 const peer = createPeer(userID, socketRef.current.id, stream);
-  //                 peersRef.current.push({
-  //                     peerID: userID,
-  //                     peer,
-  //                 })
-  //                 peers.push(peer);
-  //             })
-  //             console.log("dcadc",peers);
-  //             setPeers(peers);
-  //         })
-
-  //         socketRef.current.on("user joined", payload => {
-  //             const peer = addPeer(payload.signal, payload.callerID, stream);
-  //             peersRef.current.push({
-  //                 peerID: payload.callerID,
-  //                 peer,
-  //             })
-
-  //             setPeers(users => [...users, peer]);
-  //         });
-
-  //         socketRef.current.on("receiving returned signal", payload => {
-  //             const item = peersRef.current.find(p => p.peerID === payload.id);
-  //             item.peer.signal(payload.signal);
-  //         });
-  //     })
-  // }, []);
 
   return (
     <div
@@ -461,8 +485,10 @@ export default function Mainclass() {
         </div>
       </div>
       <div className=" h-full w-3/4 flex flex-col items-center">
-        <div className="bg-black w-3 h-5/6" style={{ width: "49vw" }}>
-          hello
+        <div className="bg-slate-500 w-3 h-5/6" style={{ width: "49vw" }}>
+          {localStorage.getItem("role") == "teacher" && (
+             <Materialupload classid={id} /> 
+          )}
         </div>
         <div className="mt-3">
           {localStorage.getItem("role") == "teacher" && (
@@ -570,6 +596,52 @@ export default function Mainclass() {
           </Modal>
         </div>
       </div>
+      <div>
+        <>
+          {localStorage.getItem("role") === "teacher" && (
+            <Button onClick={onOpen4}>Create Attendance</Button>
+          )}
+          {attendanceactiveteacher===true && (
+            <Button onClick={endattendance}>EndAttendance</Button>
+          )}
+          {
+            attendanceactive===true && <Button onClick={markattendance}>MarkAttendance</Button>
+          }
+          <Modal
+            initialFocusRef={initialRef}
+            finalFocusRef={finalRef}
+            isOpen={isOpen4}
+            onClose={onClose4}
+          >
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Create Attendance form</ModalHeader>
+              <ModalCloseButton />
+              <form onSubmit={createattendanceform}>
+                <ModalBody pb={6}>
+                  <FormControl>
+                    <FormLabel>Total Members</FormLabel>
+                    <Input
+                      type="number"
+                      ref={initialRef}
+                      placeholder="Add No of students"
+                      onChange={handlenumberchange}
+                      required
+                    />
+                  </FormControl>
+                </ModalBody>
+
+                <ModalFooter>
+                  <Button type="submit" colorScheme="blue" mr={3}>
+                    Create
+                  </Button>
+                  <Button onClick={onClose4}>Cancel</Button>
+                </ModalFooter>
+              </form>
+            </ModalContent>
+          </Modal>
+        </>
+      </div>
 
       <div className="flex">
         <div>
@@ -604,6 +676,7 @@ export default function Mainclass() {
             })}
             <div ref={ref} />
           </div>
+
           <div className="flex flex-col">
             {typing == true && (
               <div className="flex w-80 align-middle ">
@@ -635,6 +708,7 @@ export default function Mainclass() {
           </div>
         </div>
       </div>
+      {/* <Attendancepercentage/> */}
     </div>
   );
 }

@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/*
-export const update=async(data:Partial<user>)=>{
-    const newdata={first_name:data.first_name}
-    const userupdate=await user.query().findById(data.idi).patch(newdata);
-    //
+exports.update = void 0;
+const attendance_1 = require("../../attendance/domain/attendance");
+const update = async (data) => {
+    // const newdata={first_name:data.first_name}
+    const userupdate = await attendance_1.attendance.query().patch(data).where('studentid', '=', data.studentid).where('classid', '=', data.classid);
+    // 
     //obj
     console.log(userupdate);
-}
-*/ 
+};
+exports.update = update;
 //# sourceMappingURL=update.js.map

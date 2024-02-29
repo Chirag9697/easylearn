@@ -36,6 +36,8 @@ const fromuser = __importStar(require("./packages/users"));
 const fromauth = __importStar(require("./packages/authentication"));
 const fromclass = __importStar(require("./packages/classes"));
 const fromannouncement = __importStar(require("./packages/announcements"));
+const frommaterial = __importStar(require("./packages/Materials"));
+const fromattendance = __importStar(require("./packages/attendance"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const knexfile_1 = require("../knexfile");
@@ -52,6 +54,7 @@ const io = new socket_io_1.Server(server, {
 objection_1.Model.knex((0, knex_1.default)(connection));
 exports.app.use((0, cors_1.default)());
 exports.app.use(express_1.default.json());
+exports.app.use("/files", express_1.default.static("files"));
 const initial = "api/v1";
 const users = {};
 const socketToRoom = {};
@@ -59,7 +62,10 @@ exports.app.use(`/${initial}/auth`, fromauth.router);
 exports.app.use(`/${initial}/classes`, fromclass.router);
 exports.app.use(`/${initial}/users`, fromuser.router);
 exports.app.use(`/${initial}/announcements`, fromannouncement.router);
+exports.app.use(`/${initial}/materials`, frommaterial.router);
+exports.app.use(`/${initial}/attendance`, fromattendance.router);
 io.on('connection', (socket) => {
+    socket.emit('me', socket.id);
     socket.on("joinroom", (data) => {
         var rooms = io.sockets.adapter.rooms;
         var room = rooms.get(data);
@@ -74,27 +80,23 @@ io.on('connection', (socket) => {
         console.log("rooms");
         console.log(rooms);
     });
-    socket.on("join room2", roomID => {
-        if (users[roomID]) {
-            const length = users[roomID].length;
-            console.log(roomID);
-            console.log("joining room");
-            if (length === 4) {
-                socket.emit("room full");
-                return;
-            }
-            users[roomID].push(socket.id);
-        }
-        else {
-            users[roomID] = [socket.id];
-        }
-        socketToRoom[socket.id] = roomID;
-        const usersInThisRoom = users[roomID].filter((id) => id !== socket.id);
-        socket.emit("all users", usersInThisRoom);
+    socket.on('calluser', ({ userToCall, signalData, from, name }) => {
+        console.log("calluserevnet");
+        console.log(userToCall, signalData, from, name);
+        socket.in(userToCall).emit("calluser", { signal: signalData, from, name });
+    });
+    socket.on("answercall", (data) => {
+        io.to(data.to).emit("callaccepted", data.signal);
     });
     socket.on("ready", (roomname) => {
         console.log("Ready");
         socket.broadcast.to(roomname).emit("ready");
+    });
+    socket.on("attendancecreated", (id) => {
+        socket.in(id).emit("attendancestarted");
+    });
+    socket.on("attendanceended", (id) => {
+        socket.in(id).emit("attendancefinish");
     });
     socket.on('disconnect', () => {
         console.log('User disconnected');
@@ -111,15 +113,9 @@ io.on('connection', (socket) => {
         console.log("hsdaewd", args);
         socket.broadcast.to(args.room).emit("receivemessage", args);
     });
-    socket.on("sending signal", payload => {
-        io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID });
-    });
-    socket.on("returning signal", payload => {
-        io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
-    });
 });
 //   httpsServer.listen(3000);
 server.listen(3001, () => {
-    console.log("listening to port 3000");
+    console.log("listening to port 3001");
 });
 //# sourceMappingURL=index.js.map

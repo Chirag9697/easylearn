@@ -51,7 +51,7 @@ export default function Sidebar() {
       w={navSize == "small" ? "75px" : "250px"}
       flexDir="column"
     >
-      {/* <NavItem navSize={navSize} icon={FiCalendar} title="Calendar" /> */}
+     
       {/* <NavItem navSize={navSize} icon={FiUser} title="Clients" /> */}
       {/* <NavItem navSize={navSize} icon={IoPawOutline} title="Animals" /> */}
       {/* <NavItem navSize={navSize} icon={FiDollarSign} title="Stocks" /> */}
@@ -114,6 +114,10 @@ export default function Sidebar() {
               description="This is the description for the dashboard."
             />
           </Link>
+          <Link to="/materials">
+            <NavItem navSize={navSize} icon={FiCalendar} title="Study materials" />
+          </Link>
+          
         </Flex>
         <Button onClick={logout} colorScheme="red" className="w-full flex justify-center">LOGOUT</Button>
       </Flex>

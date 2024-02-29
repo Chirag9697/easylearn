@@ -84,7 +84,7 @@ export default function Registecard(props) {
           <Text className="text-center font-bold">Enter your password</Text>
             <Input name="password" placeholder='Enter your password' className="mb-2" onChange={handleonchange}/>
           </Box>
-          <Button type="submit" className="flex justify-center w-full mt-4 " style={{backgroundColor:"#fac83e"}} >REGISTER</Button>
+          <Button type="submit" className="flex justify-center w-full mt-4" style={{backgroundColor:"blue"}} >REGISTER</Button>
         </form>
         {/* </Stack> */}
       </CardBody>

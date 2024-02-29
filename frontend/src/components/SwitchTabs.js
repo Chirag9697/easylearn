@@ -3,6 +3,7 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import Logincard from "./Logincard";
 import Registecard from "./Registecard";
 import { useLocation } from "react-router";
+
 export default function SwitchTabs() {
   const location=useLocation();
   return (
