@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 // const multer=require('multer')
 router.post('/',upload.single("file"),checktoken(['teacher']),async(req,res)=>{
-    try{    
+    try{         
         const{title,classid,teacherid} = req.body;
         const fileName = req.file.filename;
         console.log(fileName);

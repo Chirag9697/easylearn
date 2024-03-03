@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import { Flex, Text, IconButton } from "@chakra-ui/react";
 import { FiMenu } from "react-icons/fi";
 import Attendancepercentage from "../components/Attendancepercentage";
+import Assignmentstatus from "../components/Assignmentstatus";
 import { useNavigate } from "react-router";
 export const Home = () => {
   const navigate = useNavigate();
@@ -19,8 +20,9 @@ export const Home = () => {
 
       
         <Sidebar />
-        <div>
-          <Attendancepercentage />
+        <div className="flex">
+          {/* <Attendancepercentage /> */}
+          <Assignmentstatus/>
         </div>
       </div>
       {/* </Flex> */}

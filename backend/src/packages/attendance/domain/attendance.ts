@@ -3,7 +3,7 @@ export class attendance extends Model{
     // classname?:String
     id?:String
     studentid?:String
-    date?:String
+    date?:Date
     classid?:String
     status?:Number
     static get tableName(){

@@ -37,7 +37,9 @@ const fromauth = __importStar(require("./packages/authentication"));
 const fromclass = __importStar(require("./packages/classes"));
 const fromannouncement = __importStar(require("./packages/announcements"));
 const frommaterial = __importStar(require("./packages/Materials"));
+const fromcheckattendance = __importStar(require("./packages/attendancecheck"));
 const fromattendance = __importStar(require("./packages/attendance"));
+const fromassignments = __importStar(require("./packages/asssignments"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const knexfile_1 = require("../knexfile");
@@ -64,6 +66,8 @@ exports.app.use(`/${initial}/users`, fromuser.router);
 exports.app.use(`/${initial}/announcements`, fromannouncement.router);
 exports.app.use(`/${initial}/materials`, frommaterial.router);
 exports.app.use(`/${initial}/attendance`, fromattendance.router);
+exports.app.use(`/${initial}/checkattendance`, fromcheckattendance.router);
+exports.app.use(`/${initial}/assignments`, fromassignments.router);
 io.on('connection', (socket) => {
     socket.emit('me', socket.id);
     socket.on("joinroom", (data) => {

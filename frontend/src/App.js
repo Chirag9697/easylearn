@@ -11,6 +11,8 @@ import Myclasses from './pages/Myclasses';
 import Mainclass from './pages/Mainclass';
 import Materials from './pages/Materials';
 import ClassMaterial from './pages/ClassMaterial';
+import Assignment from './pages/Assignment';
+import ClassAssignment from './pages/ClassAssignment';
 function App() {
   return (
     <div>
@@ -23,6 +25,8 @@ function App() {
           <Route path="/myclasses/:id" element={<Mainclass/>} />
           <Route path="/materials" element={<Materials/>}/>
           <Route path="/materials/:id" element={<ClassMaterial/>} />
+          <Route path="/assignments" element={<Assignment/>}/>
+          <Route path="/assignments/:id" element={<ClassAssignment/>} />
     </Routes>
     </div>
   );

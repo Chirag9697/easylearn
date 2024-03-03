@@ -120,6 +120,11 @@ export default function Mainclass() {
     onOpen: onOpen2,
     onClose: onClose2,
   } = useDisclosure();
+  const {
+    isOpen: isOpen5,
+    onOpen: onOpen5,
+    onClose: onClose5,
+  } = useDisclosure();
   const initialRef = React.useRef(null);
   const finalRef = React.useRef(null);
 
@@ -134,8 +139,14 @@ export default function Mainclass() {
   const [announcements, setAnnouncements] = useState([]);
   const [myStream, setMyStream] = useState();
   const [remotestream, setRemoteStream] = useState();
+  const [attendanceid, setAttendanceid] = useState();
   const [announcementmessage, setAnnouncementmessage] = useState("");
   const [memberno, setMemberno] = useState(0);
+  const [assignmentchangestate, setAssignmentchangestate] = useState({
+    title: "",
+    qp: "",
+    deadline: "",
+  });
 
   const ref = useRef(null);
   const cancelRef = React.useRef();
@@ -339,7 +350,7 @@ export default function Mainclass() {
     onOpen();
   };
 
-  const markattendance=async()=>{
+  const markattendance = async () => {
     const requestOptions = {
       method: "GET",
       headers: {
@@ -347,18 +358,20 @@ export default function Mainclass() {
         token: localStorage["token"],
       },
     };
-    const obj={
-      status:true,
-      studentid:localStorage.getItem("userid"),
-      classid:id
-    }
-    const markattendance=await axios.put(
+    const obj = {
+      id: localStorage.getItem("attendanceid"),
+      status: 1,
+      studentid: localStorage.getItem("userid"),
+      classid: id,
+    };
+    console.log(obj);
+    const markattendance = await axios.put(
       `http://localhost:3001/api/v1/attendance/`,
       obj,
       requestOptions
     );
     console.log(markattendance);
-    if(markattendance.data.success){
+    if (markattendance.data.success) {
       toast({
         title: "success message",
         description: `${markattendance.data.success}`,
@@ -368,11 +381,10 @@ export default function Mainclass() {
       });
       setattendanceaactive(false);
     }
-  }
+  };
 
-  const createattendanceform = async(e) => {
+  const createattendanceform = async (e) => {
     e.preventDefault();
-    socket.emit("attendancecreated", id);
     const requestOptions = {
       method: "GET",
       headers: {
@@ -380,24 +392,114 @@ export default function Mainclass() {
         token: localStorage["token"],
       },
     };
-    for(let i=0;i<allmembers.length;i++){
-      const obj={
-        status:false,
-        studentid:allmembers[i].id,
-        classid:id
-      }
-      const makeattendance= await axios.post(
-        `http://localhost:3001/api/v1/attendance/`,
-        obj,
+    const checkattendance = await axios.get(
+      `http://localhost:3001/api/v1/checkattendance/${id}/${localStorage.getItem(
+        "userid"
+      )}`,
+      // obj,
+      requestOptions
+    );
+    console.log(checkattendance);
+    if (checkattendance.data && checkattendance.data.attendance.length == 0) {
+      const newobj = {
+        teacherid: localStorage.getItem("userid"),
+        classid: id,
+      };
+      const checkattendance = await axios.post(
+        `http://localhost:3001/api/v1/checkattendance/`,
+        newobj,
         requestOptions
       );
+      // console.log(ch)
+      for (let i = 0; i < allmembers.length; i++) {
+        const obj = {
+          status: false,
+          studentid: allmembers[i].id,
+          classid: id,
+        };
+        const makeattendance = await axios.post(
+          `http://localhost:3001/api/v1/attendance/`,
+          obj,
+          requestOptions
+        );
+      }
+
+      socket.emit("attendancecreated", id);
+      setattendanceactiveteacher(true);
+      onClose4();
+    } else {
+      toast({
+        title: "error message",
+        description: `attendance already completed`,
+        status: "error",
+        duration: 1000,
+        isClosable: true,
+      });
+      return;
     }
-    setattendanceactiveteacher(true);
-    onClose4();
   };
   const endattendance = () => {
     socket.emit("attendanceended", id);
     setattendanceactiveteacher(false);
+  };
+  const getattendance = async () => {
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
+    };
+    const userattendance = await axios.get(
+      `http://localhost:3001/api/v1/attendance/student/${id}/${localStorage.getItem(
+        "userid"
+      )}`,
+      requestOptions
+    );
+    console.log("user", userattendance.data);
+    if (userattendance.data.attendance.length > 0) {
+      // setAttendanceid(userattendance.data[0].id);
+      localStorage.setItem(
+        "attendanceid",
+        userattendance.data.attendance[0].id
+      );
+      // console.log(attendanceid);
+    }
+  };
+  const addassignment = async (e) => {
+    e.preventDefault();
+    const formdata = new FormData();
+    formdata.append("title", assignmentchangestate.title);
+    formdata.append("file", assignmentchangestate.qp);
+    // formdata.append("teacherid", obj.teacherid);
+    formdata.append("classid", id);
+    formdata.append("deadline", assignmentchangestate.deadline);
+    const requestOptions = {
+      //   method: "",
+      headers: {
+        "Content-Type": "multipart/form-data",
+        token: localStorage["token"],
+      },
+    };
+    // console.log("dsfasdf", obj);
+    const addassignment = await axios.post(
+      `http://localhost:3001/api/v1/assignments/`,
+      formdata,
+      requestOptions
+    );
+
+    console.log(addassignment);
+  };
+  const assignmentchange = (e) => {
+    console.log(e.target.name);
+    const obj = { ...assignmentchangestate };
+    if (e.target.name == "qp") {
+      obj[e.target.name] = e.target.files[0];
+    } else {
+      obj[e.target.name] = e.target.value;
+    }
+    console.log(obj);
+    setAssignmentchangestate(obj);
   };
 
   useEffect(() => {
@@ -420,6 +522,7 @@ export default function Mainclass() {
       console.log("Disconnected from server");
     });
     socket.on("attendancestarted", () => {
+      // getattendance();
       setattendanceaactive(true);
     });
     socket.on("attendancefinish", () => {
@@ -456,6 +559,10 @@ export default function Mainclass() {
     };
   }, []);
 
+  useEffect(() => {
+    getattendance();
+  }, [attendanceactive]);
+
   return (
     <div
       className="flex justify-between  w-full p-2"
@@ -487,7 +594,7 @@ export default function Mainclass() {
       <div className=" h-full w-3/4 flex flex-col items-center">
         <div className="bg-slate-500 w-3 h-5/6" style={{ width: "49vw" }}>
           {localStorage.getItem("role") == "teacher" && (
-             <Materialupload classid={id} /> 
+            <Materialupload classid={id} />
           )}
         </div>
         <div className="mt-3">
@@ -601,12 +708,14 @@ export default function Mainclass() {
           {localStorage.getItem("role") === "teacher" && (
             <Button onClick={onOpen4}>Create Attendance</Button>
           )}
-          {attendanceactiveteacher===true && (
+          {attendanceactiveteacher === true && (
             <Button onClick={endattendance}>EndAttendance</Button>
           )}
-          {
-            attendanceactive===true && <Button onClick={markattendance}>MarkAttendance</Button>
-          }
+          {attendanceactive === true && (
+            <Button onClick={markattendance}>MarkAttendance</Button>
+          )}
+          <Button onClick={onOpen5}>Add assignments</Button>
+
           <Modal
             initialFocusRef={initialRef}
             finalFocusRef={finalRef}
@@ -636,6 +745,51 @@ export default function Mainclass() {
                     Create
                   </Button>
                   <Button onClick={onClose4}>Cancel</Button>
+                </ModalFooter>
+              </form>
+            </ModalContent>
+          </Modal>
+          <Modal isOpen={isOpen5} onClose={onClose5}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Create your account</ModalHeader>
+              <ModalCloseButton />
+              <form onSubmit={addassignment}>
+                <ModalBody pb={6}>
+                  <FormControl>
+                    <FormLabel>Enter title of assignment</FormLabel>
+                    <Input
+                      onChange={assignmentchange}
+                      name="title"
+                      placeholder="Enter title"
+                      required
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Enter the deadline</FormLabel>
+                    <Input
+                      onChange={assignmentchange}
+                      name="deadline"
+                      type="date"
+                      required
+                    />
+                  </FormControl>
+                  <FormControl mt={4}>
+                    <FormLabel>Add the Question Paper</FormLabel>
+                    <Input
+                      onChange={assignmentchange}
+                      name="qp"
+                      type="file"
+                      required
+                    />
+                  </FormControl>
+                </ModalBody>
+
+                <ModalFooter>
+                  <Button type="submit" colorScheme="blue" mr={3}>
+                    submit
+                  </Button>
+                  <Button onClick={onClose5}>Cancel</Button>
                 </ModalFooter>
               </form>
             </ModalContent>

@@ -8,7 +8,9 @@ import * as fromauth from './packages/authentication';
 import * as fromclass from './packages/classes';
 import * as fromannouncement from './packages/announcements';
 import * as frommaterial from './packages/Materials';
+import * as fromcheckattendance from './packages/attendancecheck';
 import * as fromattendance from './packages/attendance';
+import * as fromassignments from './packages/asssignments';
 import http from 'http';
 
 import { Server } from 'socket.io';
@@ -38,12 +40,17 @@ const initial="api/v1";
 const users = {};
 
 const socketToRoom = {};
+
 app.use(`/${initial}/auth`,fromauth.router);
 app.use(`/${initial}/classes`,fromclass.router);
 app.use(`/${initial}/users`,fromuser.router)
 app.use(`/${initial}/announcements`,fromannouncement.router);
 app.use(`/${initial}/materials`,frommaterial.router);
 app.use(`/${initial}/attendance`,fromattendance.router);
+app.use(`/${initial}/checkattendance`,fromcheckattendance.router) ;
+app.use(`/${initial}/assignments`,fromassignments.router) ;
+
+
 io.on('connection', (socket) => {
     socket.emit('me',socket.id);
     socket.on("joinroom",(data)=>{
