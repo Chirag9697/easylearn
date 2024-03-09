@@ -18,7 +18,7 @@ import { WrapItem } from "@chakra-ui/react";
 import { Avatar } from "@chakra-ui/react";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { useRef } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import Materialupload from "../components/Materialupload";
 import { useToast } from "@chakra-ui/react";
@@ -125,6 +125,11 @@ export default function Mainclass() {
     onOpen: onOpen5,
     onClose: onClose5,
   } = useDisclosure();
+  const {
+    isOpen: isOpen6,
+    onOpen: onOpen6,
+    onClose: onClose6,
+  } = useDisclosure();
   const initialRef = React.useRef(null);
   const finalRef = React.useRef(null);
 
@@ -142,6 +147,7 @@ export default function Mainclass() {
   const [attendanceid, setAttendanceid] = useState();
   const [announcementmessage, setAnnouncementmessage] = useState("");
   const [memberno, setMemberno] = useState(0);
+  const [questionno, setquestionno] = useState(0);
   const [assignmentchangestate, setAssignmentchangestate] = useState({
     title: "",
     qp: "",
@@ -466,6 +472,9 @@ export default function Mainclass() {
       // console.log(attendanceid);
     }
   };
+  const generatequestion = (e) => {
+    setquestionno(e.target.value);
+  };
   const addassignment = async (e) => {
     e.preventDefault();
     const formdata = new FormData();
@@ -593,9 +602,9 @@ export default function Mainclass() {
       </div>
       <div className=" h-full w-3/4 flex flex-col items-center">
         <div className="bg-slate-500 w-3 h-5/6" style={{ width: "49vw" }}>
-          {localStorage.getItem("role") == "teacher" && (
-            <Materialupload classid={id} />
-          )}
+          {/* {localStorage.getItem("role") == "teacher" && (
+            <Materialupload classid={id} /> 
+           )}  */}
         </div>
         <div className="mt-3">
           {localStorage.getItem("role") == "teacher" && (
@@ -616,7 +625,61 @@ export default function Mainclass() {
               ADD Announcements
             </Button>
           )}
+          {localStorage.getItem("role") === "teacher" && (
+            <Link to={`/addquestion/${id}`}>
+            <Button colorScheme="blue">
+              ADD Quiz  
+            </Button>
+            </Link>
+          )}
           {/* </div> */}
+          <Modal
+            // className="overflow-y-scroll"
+            initialFocusRef={initialRef}
+            finalFocusRef={finalRef}
+            isOpen={isOpen6}
+            onClose={onClose6}
+          >
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Add quiz questions</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody pb={6}>
+                <FormControl>
+                  <FormLabel>Title</FormLabel>
+                  <Input placeholder="add title of quiz" />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>No of questions</FormLabel>
+                  <Input
+                    type="number"
+                    placeholder="add title of quiz"
+                    onChange={generatequestion}
+                  />
+                </FormControl>
+                <FormControl mt={4}>
+                  {}
+                  <div>
+                    <FormLabel>Quesion 1</FormLabel>
+                    <Input placeholder="add the question" />
+                    <div className="p-3 overflow-y-scroll">
+                      <Input placeholder="option1" />
+                      <Input placeholder="option1" />
+                      <Input placeholder="option1" />
+                      <Input placeholder="option1" />
+                    </div>
+                  </div>
+                </FormControl>
+              </ModalBody>
+
+              <ModalFooter>
+                <Button colorScheme="blue" mr={3}>
+                  Save
+                </Button>
+                <Button onClick={onClose}>Cancel</Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
           <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>

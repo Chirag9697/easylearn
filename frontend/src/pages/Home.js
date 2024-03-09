@@ -6,6 +6,7 @@ import { FiMenu } from "react-icons/fi";
 import Attendancepercentage from "../components/Attendancepercentage";
 import Assignmentstatus from "../components/Assignmentstatus";
 import { useNavigate } from "react-router";
+import Allquizstatus from "../components/Allquizstatus";
 export const Home = () => {
   const navigate = useNavigate();
   useEffect(() => {
@@ -17,12 +18,11 @@ export const Home = () => {
     <>
       {/* <Flex w="100%"> */}
       <div className="flex">
-
-      
         <Sidebar />
-        <div className="flex">
-          {/* <Attendancepercentage /> */}
+        <div className="flex w-[80vw]">
+          <Attendancepercentage />
           <Assignmentstatus/>
+          <Allquizstatus/>
         </div>
       </div>
       {/* </Flex> */}

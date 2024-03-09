@@ -11,6 +11,8 @@ import * as frommaterial from './packages/Materials';
 import * as fromcheckattendance from './packages/attendancecheck';
 import * as fromattendance from './packages/attendance';
 import * as fromassignments from './packages/asssignments';
+import * as fromquizes from './packages/quizes';
+import * as fromquestions from './packages/questions';
 import http from 'http';
 
 import { Server } from 'socket.io';
@@ -49,6 +51,8 @@ app.use(`/${initial}/materials`,frommaterial.router);
 app.use(`/${initial}/attendance`,fromattendance.router);
 app.use(`/${initial}/checkattendance`,fromcheckattendance.router) ;
 app.use(`/${initial}/assignments`,fromassignments.router) ;
+app.use(`/${initial}/quiz`,fromquizes.router) ;
+app.use(`/${initial}/questions`,fromquestions.router) ;
 
 
 io.on('connection', (socket) => {

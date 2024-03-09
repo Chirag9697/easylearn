@@ -13,6 +13,12 @@ import Materials from './pages/Materials';
 import ClassMaterial from './pages/ClassMaterial';
 import Assignment from './pages/Assignment';
 import ClassAssignment from './pages/ClassAssignment';
+import Calender from './components/Calender';
+import AddQuestion from './pages/AddQuestion';
+import Quizpage from './pages/Quizpage';
+import Actualquizpage from './pages/Actualquizpage';
+
+
 function App() {
   return (
     <div>
@@ -27,6 +33,10 @@ function App() {
           <Route path="/materials/:id" element={<ClassMaterial/>} />
           <Route path="/assignments" element={<Assignment/>}/>
           <Route path="/assignments/:id" element={<ClassAssignment/>} />
+          <Route path="/calender" element={<Calender/>} />
+          <Route path="/addquestion/:id" element={<AddQuestion/>} />
+          <Route path="/quiz" element={<Quizpage/>} />
+          <Route path="/quiz/:id" element={<Actualquizpage/>} />
     </Routes>
     </div>
   );
