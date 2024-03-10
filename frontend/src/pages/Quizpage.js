@@ -44,7 +44,7 @@ const Quizpage = () => {
               <p>{quiz.time}</p>
               <p>{quiz.duration}</p>
               <p>{quiz.Marks}Marks</p>
-              <Link to={'/quiz/:id'}>
+              <Link to={`/quiz/${quiz.id}`}>
                 <Button colorScheme="cyan">START QUIZ</Button>
               </Link>
               {/* <p>10marks</p> */}

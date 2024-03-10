@@ -13,6 +13,7 @@ import * as fromattendance from './packages/attendance';
 import * as fromassignments from './packages/asssignments';
 import * as fromquizes from './packages/quizes';
 import * as fromquestions from './packages/questions';
+import * as frommarks from './packages/Marks';
 import http from 'http';
 
 import { Server } from 'socket.io';
@@ -53,6 +54,7 @@ app.use(`/${initial}/checkattendance`,fromcheckattendance.router) ;
 app.use(`/${initial}/assignments`,fromassignments.router) ;
 app.use(`/${initial}/quiz`,fromquizes.router) ;
 app.use(`/${initial}/questions`,fromquestions.router) ;
+app.use(`/${initial}/marks`,frommarks.router) ;
 
 
 io.on('connection', (socket) => {

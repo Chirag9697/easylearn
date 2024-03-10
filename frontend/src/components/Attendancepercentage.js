@@ -32,6 +32,7 @@ const Attendancepercentage = () => {
   }, []);
   return (
     <div className="mt-10 ml-7 p-2 h-[50vh] w-[40vw] bg-gray-300 rounded-md shadow-md overflow-scroll overflow-x-hidden">
+      <h1 className="font-bold text-center">ATTENDANCE RECORD</h1>
       {attendancerecord.map((record) => {
         const attendanceperc=(record.count/record.totalcount)*100;
         return (
