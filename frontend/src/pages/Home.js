@@ -7,6 +7,7 @@ import Attendancepercentage from "../components/Attendancepercentage";
 import Assignmentstatus from "../components/Assignmentstatus";
 import { useNavigate } from "react-router";
 import Allquizstatus from "../components/Allquizstatus";
+import Markstatus from "../components/Markstatus";
 export const Home = () => {
   const navigate = useNavigate();
   useEffect(() => {
@@ -19,10 +20,11 @@ export const Home = () => {
       {/* <Flex w="100%"> */}
       <div className="flex">
         <Sidebar />
-        <div className="flex w-[80vw]">
+        <div className="flex flex-wrap w-[80vw] mx-14">
           <Attendancepercentage />
           <Assignmentstatus/>
           <Allquizstatus/>
+          <Markstatus/>
         </div>
       </div>
       {/* </Flex> */}

@@ -25,6 +25,7 @@ export default function Logincard(props) {
   };
   const handleLogin = async (e) => {
     console.log("login")
+    console.log(props.role);
     e.preventDefault();
     const requestOptions = {
       headers: {

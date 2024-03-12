@@ -17,7 +17,8 @@ import Calender from './components/Calender';
 import AddQuestion from './pages/AddQuestion';
 import Quizpage from './pages/Quizpage';
 import Actualquizpage from './pages/Actualquizpage';
-
+import Groupspage from './pages/Groupspage';
+import Allclassesgroups from './pages/Allclassesgroups';
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
           <Route path="/addquestion/:id" element={<AddQuestion/>} />
           <Route path="/quiz" element={<Quizpage/>} />
           <Route path="/quiz/:id" element={<Actualquizpage/>} />
+          <Route path="/classgroups" element={<Allclassesgroups/>} />
+          <Route path="/classgroups/:id" element={<Groupspage/>} />
     </Routes>
     </div>
   );

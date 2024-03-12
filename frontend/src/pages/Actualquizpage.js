@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import PageVisibility from "react-page-visibility";
 import { useNavigate, useParams } from "react-router";
 import axios from "axios";
-import { Button } from "@chakra-ui/react";
+import { Button, Mark } from "@chakra-ui/react";
 import { Spinner } from "@chakra-ui/react";
 
 const Actualquizpage = () => {
@@ -47,7 +47,7 @@ const Actualquizpage = () => {
   };
   const prevquestion = () => {
     setquestionno(quesionno - 1);
-  };
+  };  
   const submitquiz = async () => {
     setLoading(true);
     const requestOptions = {
@@ -57,9 +57,16 @@ const Actualquizpage = () => {
         token: localStorage["token"],
       },
     };
+    const obj={
+      marks:marks,
+      sourceid:id,
+      userid:localStorage.getItem("userid"),
+      title:"quizes mark"
+    }
 
     const addmarks = await axios.post(
       `http://localhost:3001/api/v1/marks`,
+      obj,
       requestOptions
     );
     if(addmarks.data.success){

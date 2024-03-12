@@ -123,6 +123,9 @@ export default function Sidebar() {
           <Link to="/quiz">
             <NavItem navSize={navSize} icon={FiCalendar} title="Quizes" />
           </Link>
+          <Link to="/classgroups">
+            <NavItem navSize={navSize} icon={FiCalendar} title="Groups links" />
+          </Link>
         </Flex>
         <Button onClick={logout} colorScheme="red" className="w-full flex justify-center">LOGOUT</Button>
       </Flex>
