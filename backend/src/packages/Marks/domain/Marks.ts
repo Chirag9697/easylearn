@@ -5,6 +5,7 @@ export class Marks extends Model{
     title?:String
     userid?:String
     sourceid?:String
+    marks?:Number
     static get tableName(){
         return  'Marks';
     }

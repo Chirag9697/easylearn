@@ -65,7 +65,10 @@ exports.router.get('/:userid', (0, check_token_1.checktoken)(['teacher', 'studen
         let allquizes = [];
         for (let i = 0; i < getallclasses.length; i++) {
             const getquiz = await fromquiz.findone(getallclasses[i].id);
-            allquizes.push(getquiz);
+            console.log("getquiz", getquiz);
+            if (getquiz) {
+                allquizes.push(getquiz);
+            }
         }
         console.log(allquizes);
         res.send({ success: allquizes });

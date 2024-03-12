@@ -39,6 +39,7 @@ exports.router.get('/:quizid', (0, check_token_1.checktoken)(['teacher', 'studen
     try {
         const { quizid } = req.params;
         const allquestions = await fromquestions.findall();
+        console.log(allquestions);
         res.send({ success: allquestions });
     }
     catch (error) {

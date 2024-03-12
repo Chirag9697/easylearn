@@ -35,6 +35,13 @@ dotenv_1.default.config();
 const login = async (data) => {
     const { email, password } = data;
     const userlogging = await fromusers.get_one2(email);
+    const { role } = userlogging;
+    console.log(role);
+    console.log(data.role);
+    if (data.role != role) {
+        throw new Error("user not found");
+        return;
+    }
     if (!userlogging) {
         throw new Error("user not found");
         return;

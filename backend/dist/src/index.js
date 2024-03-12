@@ -43,6 +43,7 @@ const fromassignments = __importStar(require("./packages/asssignments"));
 const fromquizes = __importStar(require("./packages/quizes"));
 const fromquestions = __importStar(require("./packages/questions"));
 const frommarks = __importStar(require("./packages/Marks"));
+const fromgroups = __importStar(require("./packages/classgroups"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const knexfile_1 = require("../knexfile");
@@ -74,6 +75,7 @@ exports.app.use(`/${initial}/assignments`, fromassignments.router);
 exports.app.use(`/${initial}/quiz`, fromquizes.router);
 exports.app.use(`/${initial}/questions`, fromquestions.router);
 exports.app.use(`/${initial}/marks`, frommarks.router);
+exports.app.use(`/${initial}/classgroups`, fromgroups.router);
 io.on('connection', (socket) => {
     socket.emit('me', socket.id);
     socket.on("joinroom", (data) => {

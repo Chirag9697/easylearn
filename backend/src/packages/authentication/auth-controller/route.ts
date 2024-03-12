@@ -44,9 +44,9 @@ router.delete('/deleteuser/:id',async(req,res)=>{
 })
 
 router.post('/login',async(req,res)=>{
-    const {email,password}=req.body;
+    const {email,password,role}=req.body;
     // console.log("hello")
-    const data={email,password};
+    const data={email,password,role};
     console.log(data)
     try{
         const tok=await fromauth.login(data);

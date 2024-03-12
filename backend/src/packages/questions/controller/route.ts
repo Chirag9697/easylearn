@@ -20,6 +20,7 @@ router.get('/:quizid',checktoken(['teacher','student']),async(req,res)=>{
     try{
         const{quizid}=req.params;
     const allquestions=await fromquestions.findall();
+     console.log(allquestions);
         res.send({success:allquestions});
     }catch(error){
         res.send({error:error});

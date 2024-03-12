@@ -1,15 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findall = exports.get_all = void 0;
-// import { Marks } from "../domain/Marks";
-const Marks_1 = require("../domain/Marks");
+const classgroup_1 = require("../domain/classgroup");
 const get_all = async () => {
-    const allmarks = await Marks_1.Marks.query();
+    const allmarks = await classgroup_1.Classgroup.query();
     return allmarks;
 };
 exports.get_all = get_all;
-const findall = async (userid) => {
-    const allmarks = await Marks_1.Marks.query().where('userid', '=', userid);
+const findall = async (classid) => {
+    const allmarks = await classgroup_1.Classgroup.query().where('classid', '=', classid);
     return allmarks;
 };
 exports.findall = findall;

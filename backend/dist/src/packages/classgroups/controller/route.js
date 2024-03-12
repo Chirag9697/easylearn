@@ -29,53 +29,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 //lib
 const express_1 = __importDefault(require("express"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const fromauth = __importStar(require("../../authentication"));
-dotenv_1.default.config();
+const check_token_1 = require("../../../utils/check-token");
+const fromgroups = __importStar(require("../../classgroups"));
+// import Date
 const app = (0, express_1.default)();
 exports.router = express_1.default.Router();
-exports.router.post('/register', async (req, res) => {
-    console.log("registerhere");
-    console.log(req.body);
-    const { name, email, password, role } = req.body;
-    const data1 = { name, email, password, role };
-    console.log(data1);
+exports.router.post('/', (0, check_token_1.checktoken)(['teacher', 'student']), async (req, res) => {
     try {
-        const newuser = await fromauth.register(data1);
-        console.log("New USER", newuser);
-        return res.status(200).send(newuser);
+        const { link, classid } = req.body;
+        const data = { link, classid };
+        const addmarks = await fromgroups.create(data);
+        console.log("hello");
+        res.send({ success: "group is added" });
     }
     catch (error) {
-        console.log(error);
-        res.status(200).send({ error: `${error}` });
+        res.send({ error: error });
     }
 });
-exports.router.delete('/deleteuser/:id', async (req, res) => {
-    console.log("delete this user please");
-    const { id } = req.params;
-    console.log("id of the user", id);
+exports.router.get('/:classid', (0, check_token_1.checktoken)(['teacher', 'student']), async (req, res) => {
     try {
-        await fromauth.deleteuser(parseInt(id));
-        res.status(200).send("user deleted");
+        const { classid } = req.params;
+        const getgroups = await fromgroups.findall(classid);
+        res.send({ success: getgroups });
     }
     catch (error) {
-        return res.status(200).send({ error: `${error}` });
-    }
-});
-exports.router.post('/login', async (req, res) => {
-    const { email, password, role } = req.body;
-    // console.log("hello")
-    const data = { email, password, role };
-    console.log(data);
-    try {
-        const tok = await fromauth.login(data);
-        console.log(tok);
-        return res.status(200).json(tok);
-        //    return res.send();
-    }
-    catch (error) {
-        console.log(error);
-        return res.status(200).send({ error: `${error}` });
+        res.send({ error: error });
     }
 });
 //# sourceMappingURL=route.js.map

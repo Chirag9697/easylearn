@@ -1,3 +1,4 @@
+// import { Marks } from "../domain/Marks";
 import { Marks } from "../domain/Marks";
 
 export const get_all=async()=>{
