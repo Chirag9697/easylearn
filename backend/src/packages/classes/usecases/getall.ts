@@ -17,3 +17,9 @@ export const getallclassteacherid=async(teacherid)=>{
     const allclasseslist=await classes.query().select('id').where('teacherid','=',teacherid).distinct();
     return allclasseslist;
 }
+
+
+export const getallfaculties=async(studentid)=>{
+    const allfacultylist=await classes.query().select('teacherid').where('studentid','=',studentid).distinct();
+    return allfacultylist;
+}

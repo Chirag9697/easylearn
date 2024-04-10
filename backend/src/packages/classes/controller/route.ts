@@ -94,4 +94,23 @@ router.delete('/:classid',checktoken(["teacher"]),async(req,res)=>{
     }
 })
 
+router.get('/faculties/:studentid',checktoken(["teacher","student"]),async(req,res)=>{
+    try{
+        const{studentid}=req.params;
+        let allstudents=[];
+        const allfacultylist=await fromclass.getallfaculties(studentid);
+        const allfacultydetails=[];
+        let i;
+        for(i=0;i<allfacultylist.length;i++){
+            const detailsoffaculty=await fromusers.get_one(allfacultylist[i].teacherid);
+            const newobj={id:allfacultylist[i].teacherid,name:detailsoffaculty.name,email:detailsoffaculty.email};
+            allfacultydetails.push(newobj);
+        }
+        console.log(allfacultydetails);
+        res.send({allfacultylist:allfacultydetails});
+    }catch(error){
+        res.send({error:error});
+    }
+})
+
 

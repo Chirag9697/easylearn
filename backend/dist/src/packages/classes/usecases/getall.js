@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getallclassteacherid = exports.getallclassstudentid = exports.getallclassid = exports.getall = void 0;
+exports.getallfaculties = exports.getallclassteacherid = exports.getallclassstudentid = exports.getallclassid = exports.getall = void 0;
 const class_1 = require("../domain/class");
 const getall = async () => {
     const allclasses = await class_1.classes.query();
@@ -23,4 +23,9 @@ const getallclassteacherid = async (teacherid) => {
     return allclasseslist;
 };
 exports.getallclassteacherid = getallclassteacherid;
+const getallfaculties = async (studentid) => {
+    const allfacultylist = await class_1.classes.query().select('teacherid').where('studentid', '=', studentid).distinct();
+    return allfacultylist;
+};
+exports.getallfaculties = getallfaculties;
 //# sourceMappingURL=getall.js.map

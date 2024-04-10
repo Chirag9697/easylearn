@@ -19,7 +19,7 @@ import Quizpage from './pages/Quizpage';
 import Actualquizpage from './pages/Actualquizpage';
 import Groupspage from './pages/Groupspage';
 import Allclassesgroups from './pages/Allclassesgroups';
-
+import Askadoubt from './pages/Askadoubt';
 function App() {
   return (
     <div>
@@ -40,6 +40,7 @@ function App() {
           <Route path="/quiz/:id" element={<Actualquizpage/>} />
           <Route path="/classgroups" element={<Allclassesgroups/>} />
           <Route path="/classgroups/:id" element={<Groupspage/>} />
+          <Route path="/askadoubt" element={<Askadoubt/>} />
     </Routes>
     </div>
   );

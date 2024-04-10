@@ -44,6 +44,7 @@ const fromquizes = __importStar(require("./packages/quizes"));
 const fromquestions = __importStar(require("./packages/questions"));
 const frommarks = __importStar(require("./packages/Marks"));
 const fromgroups = __importStar(require("./packages/classgroups"));
+const frommessages = __importStar(require("./packages/Messages"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const knexfile_1 = require("../knexfile");
@@ -76,8 +77,17 @@ exports.app.use(`/${initial}/quiz`, fromquizes.router);
 exports.app.use(`/${initial}/questions`, fromquestions.router);
 exports.app.use(`/${initial}/marks`, frommarks.router);
 exports.app.use(`/${initial}/classgroups`, fromgroups.router);
+exports.app.use(`/${initial}/messages`, frommessages.router);
 io.on('connection', (socket) => {
-    socket.emit('me', socket.id);
+    // socket.emit('me',socket.id);
+    console.log("connected", socket.id);
+    // socket.on("connect",(id)=>{
+    // console.log("connected")
+    // })
+    socket.emit("myid", socket.id);
+    socket.on("sendmessage", (data) => {
+        console.log(data);
+    });
     socket.on("joinroom", (data) => {
         var rooms = io.sockets.adapter.rooms;
         var room = rooms.get(data);
@@ -120,10 +130,6 @@ io.on('connection', (socket) => {
     });
     socket.on("nottyping", (args) => {
         socket.in(args).emit("noonetyping", args);
-    });
-    socket.on("sendmessage", (args) => {
-        console.log("hsdaewd", args);
-        socket.broadcast.to(args.room).emit("receivemessage", args);
     });
 });
 //   httpsServer.listen(3000);

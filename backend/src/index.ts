@@ -15,6 +15,7 @@ import * as fromquizes from './packages/quizes';
 import * as fromquestions from './packages/questions';
 import * as frommarks from './packages/Marks';
 import * as fromgroups from './packages/classgroups';
+import * as frommessages from './packages/Messages';
 import http from 'http';
 
 import { Server } from 'socket.io';
@@ -57,10 +58,19 @@ app.use(`/${initial}/quiz`,fromquizes.router) ;
 app.use(`/${initial}/questions`,fromquestions.router) ;
 app.use(`/${initial}/marks`,frommarks.router) ;
 app.use(`/${initial}/classgroups`,fromgroups.router) ;
+app.use(`/${initial}/messages`,frommessages.router) ;
 
 
 io.on('connection', (socket) => {
-    socket.emit('me',socket.id);
+    // socket.emit('me',socket.id);
+    console.log("connected",socket.id);
+    // socket.on("connect",(id)=>{
+      // console.log("connected")
+    // })
+    socket.emit("myid",socket.id);
+    socket.on("sendmessage",(data)=>{
+      console.log(data);
+    })
     socket.on("joinroom",(data)=>{
         var rooms=io.sockets.adapter.rooms;
         var room=rooms.get(data);
@@ -104,10 +114,7 @@ io.on('connection', (socket) => {
     socket.on("nottyping",(args)=>{
         socket.in(args).emit("noonetyping",args);
     })
-    socket.on("sendmessage",(args)=>{
-      console.log("hsdaewd",args);
-      socket.broadcast.to(args.room).emit("receivemessage",args);
-    })
+   
   });
 //   httpsServer.listen(3000);
 server.listen(3001,()=>{
