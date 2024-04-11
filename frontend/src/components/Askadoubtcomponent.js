@@ -10,9 +10,10 @@ const socket = io.connect("http://localhost:3001");
 const Askadoubtcomponent = () => {
   const [faculties, setFaculties] = useState([]);
   const [message, setMessage] = useState("");
+  const [doubts, setDoubts] = useState([]);
   const [typing, setTyping] = useState(false);
-  const[me,setMe]=useState(null);
-  const[messages,setMessages]=useState([]);
+  const [me, setMe] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [facultymessage, setFacultymessage] = useState(0);
   // console.log("hello")
   // const sendmessage = async (e) => {
@@ -106,7 +107,24 @@ const Askadoubtcomponent = () => {
   //     block: "end",
   //   });
   // }, [messages.length]);
-  const sendmessage=async(e)=>{
+  const getalldoubts = async () => {
+    const requestOptions = {
+      // method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage["token"],
+      },
+    };
+    const alldoubts = await axios.get(
+      `http://localhost:3001/api/v1/messages/doubts/${localStorage.getItem(
+        "userid"
+      )}`,
+      requestOptions
+    );
+    console.log(alldoubts)
+    setDoubts(alldoubts.data.messages);
+  };
+  const sendmessage = async (e) => {
     e.preventDefault();
     const requestOptions = {
       // method: "GET",
@@ -115,7 +133,12 @@ const Askadoubtcomponent = () => {
         token: localStorage["token"],
       },
     };
-    const item = { senderid:localStorage.getItem("userid"),message:message,receiverid:faculties[facultymessage].id,date:new Date()};
+    const item = {
+      senderid: localStorage.getItem("userid"),
+      message: message,
+      receiverid: localStorage.getItem("role")==="student"?faculties[facultymessage].id:doubts[facultymessage],
+      date: new Date(),
+    };
     const messagesent = await axios.post(
       "http://localhost:3001/api/v1/messages",
       item,
@@ -123,9 +146,8 @@ const Askadoubtcomponent = () => {
     );
 
     console.log("message is sentt");
-    
-    
-  }
+    getallmessages(facultymessage);
+  };
   useEffect(() => {
     // socket.on("connect", () => {
     //   console.log("connected");
@@ -136,17 +158,24 @@ const Askadoubtcomponent = () => {
     // socket.on("myid",(id)=>{
     //   setMe(id);
     // })
-    getallfaculties();
-
+    if (localStorage.getItem("role") === "student") {
+      getallfaculties();
+    }
+    if (localStorage.getItem("role") === "teacher") {
+      getalldoubts();
+    }
     setFacultymessage(-1);
     return () => {
       socket.off("connect");
       socket.off("disconnect");
     };
-
   }, [socket]);
-  const setfacultymessage=async(index)=>{
+  const setfacultymessage = async (index) => {
     setFacultymessage(index);
+    getallmessages(index);
+    
+  };
+  const getallmessages=async(index)=>{
     const requestOptions = {
       method: "GET",
       headers: {
@@ -154,13 +183,12 @@ const Askadoubtcomponent = () => {
         token: localStorage["token"],
       },
     };
-    
 
-    console.log(faculties[index].id);
+    // console.log(faculties[index].id);
     const allmessages = await axios.get(
       `http://localhost:3001/api/v1/messages/${localStorage.getItem(
-        "userid")}/${faculties[index].id}`
-      ,
+        "userid"
+      )}/${localStorage.getItem("role")==="student"?faculties[index].id:doubts[index]}`,
       requestOptions
     );
     console.log(allmessages);
@@ -171,9 +199,13 @@ const Askadoubtcomponent = () => {
       <p className="text-center font-bold text-3xl">Ask A Doubt</p>
       <div className="flex justify-center">
         <div className="flex flex-col w-[20vw] overflow-y-scroll bg-white">
-          {faculties.map((faculty, index) => {
+          
+          {localStorage.getItem("role")==="student" && faculties.length>0 &&  faculties.map((faculty, index) => {
             return (
-              <div className="flex p-4 bg-white w-[full] h-20 border-y-2 border-black space-x-2 align-middle cursor-pointer hover:bg-gray-300" onClick={()=>setfacultymessage(index)}>
+              <div
+                className="flex p-4 bg-white w-[full] h-20 border-y-2 border-black space-x-2 align-middle cursor-pointer hover:bg-gray-300"
+                onClick={() => setfacultymessage(index)}
+              >
                 <WrapItem>
                   <Avatar
                     name={localStorage.getItem("name")}
@@ -184,11 +216,27 @@ const Askadoubtcomponent = () => {
               </div>
             );
           })}
+          {localStorage.getItem("role")==="teacher" && doubts.map((doubt, index) => {
+            return (
+              <div
+                className="flex p-4 bg-white w-[full] h-20 border-y-2 border-black space-x-2 align-middle cursor-pointer hover:bg-gray-300"
+                onClick={() => setfacultymessage(index)}
+              >
+                <WrapItem>
+                  <Avatar
+                    name={localStorage.getItem("name")}
+                    src="https://bit.ly/tioluwani-kolawole"
+                  />
+                </WrapItem>
+                <p className="mt-2">{doubt}</p>
+              </div>
+            );
+          }
+          )}
         </div>
         <div className="flex flex-col bg-white w-[40vw] h-[80vh]">
           {facultymessage === -1 && <p>no meesage selected</p>}
-          {facultymessage !==-1 && (
-            
+          {facultymessage !== -1 && (
             <div>
               <div className="flex space-x-3 bg-gray-400 p-2 shadow-md">
                 <WrapItem>
@@ -197,28 +245,52 @@ const Askadoubtcomponent = () => {
                     src="https://bit.ly/tioluwani-kolawole"
                   />
                 </WrapItem>
-                <h1 className="mt-2">{faculties.length>0 && faculties[facultymessage].name}</h1>
+                <h1 className="mt-2">
+                  {faculties.length > 0 && faculties[facultymessage].name}
+                </h1>
               </div>
               <div className="bg-slate-900 h-[60vh] overflow-y-scroll">
-                {messages && 
-                  messages.map((message)=>{
-                    return (
-                      <p className="text-yellow-400">{message.message}</p>
-                    )
-                  })
-                }
+                {messages &&
+                  messages.map((m) => {
+                    if (m.senderid === localStorage.getItem("userid")) {
+                      return (
+                        <div class="flex items-center justify-start flex-row-reverse">
+                          <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
+                            A
+                          </div>
+                          <div class="relative flex flex-end mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl">
+                            <div>{m.message}</div>
+                            {/* <p className="text-yel/low-400">{message.message}</p> */}
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div class="flex flex-row items-center">
+                          <div class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
+                            A
+                          </div>
+                          <div class="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl">
+                            <div>{m.message}</div>
+                          </div>
+                        </div>
+                      );
+                    }
+                  })}
               </div>
-                <form onSubmit={sendmessage}>
-              <div className="flex">
-                <Input
-                  placeholder="Enter the message"
-                  variant={"outline"}
-                  colorScheme="gray"
-                  onChange={handlemessage}
-                />
-                <Button colorScheme="blue" type="submit">SEND</Button>
-              </div>
-                  </form>
+              <form onSubmit={sendmessage}>
+                <div className="flex">
+                  <Input
+                    placeholder="Enter the message"
+                    variant={"outline"}
+                    colorScheme="gray"
+                    onChange={handlemessage}
+                  />
+                  <Button colorScheme="blue" type="submit">
+                    SEND
+                  </Button>
+                </div>
+              </form>
             </div>
           )}
         </div>

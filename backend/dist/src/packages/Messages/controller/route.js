@@ -45,10 +45,22 @@ exports.router.post('/', (0, check_token_1.checktoken)(['teacher', 'student']), 
         res.send({ error: error });
     }
 });
+exports.router.get('/doubts/:userid', (0, check_token_1.checktoken)(['teacher', 'student']), async (req, res) => {
+    try {
+        const { userid } = req.params;
+        const getmessages = await frommessages.getalldoubts(userid);
+        console.log(getmessages);
+        res.send({ messages: getmessages });
+    }
+    catch (error) {
+        res.send({ error: error });
+    }
+});
 exports.router.get('/:userid/:otherid', (0, check_token_1.checktoken)(['teacher', 'student']), async (req, res) => {
     try {
         const { userid, otherid } = req.params;
         const getmessages = await frommessages.findall(userid, otherid);
+        console.log(getmessages);
         res.send({ messages: getmessages });
     }
     catch (error) {

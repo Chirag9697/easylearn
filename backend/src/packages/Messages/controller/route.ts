@@ -20,10 +20,21 @@ router.post('/',checktoken(['teacher','student']),async(req,res)=>{
         res.send({error:error});
     }
 })
+router.get('/doubts/:userid',checktoken(['teacher','student']),async(req,res)=>{
+    try{
+        const{userid}=req.params;
+        const getmessages=await frommessages.getalldoubts(userid);
+        console.log(getmessages);
+        res.send({messages:getmessages});
+    }catch(error){
+        res.send({error:error});
+    }
+})
 router.get('/:userid/:otherid',checktoken(['teacher','student']),async(req,res)=>{
     try{
         const{userid,otherid}=req.params;
         const getmessages=await frommessages.findall(userid,otherid);
+        console.log(getmessages);
         res.send({messages:getmessages});
     }catch(error){
         res.send({error:error});

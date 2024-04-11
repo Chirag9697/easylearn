@@ -127,7 +127,8 @@ export default function Sidebar() {
             <NavItem navSize={navSize} icon={FiCalendar} title="Groups links" />
           </Link>
           <Link to="/askadoubt">
-            <NavItem navSize={navSize} icon={FiCalendar} title="Ask A Doubt" />
+            
+            <NavItem navSize={navSize} icon={FiCalendar} title={localStorage.getItem("role")==="student"?"Ask A Doubt":"doubts"} />
           </Link>
         </Flex>
         <Button onClick={logout} colorScheme="red" className="w-full flex justify-center">LOGOUT</Button>
